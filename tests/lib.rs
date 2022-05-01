@@ -43,11 +43,6 @@ pub mod indirect {
 
 pub fn setup_vm() -> VM {
     let vm = VM::new();
-    assert_eq!(
-        vm.registers,
-        [0, 0, 0, 0, 0, 0, 0, 0, registers::flags::DEFAULT]
-    );
-    assert_eq!(vm.memory, [0; mem::TOTAL]);
     assert_eq!(vm.pc, 0);
     assert_eq!(vm.save_dirty_flag, [false; SAVE_COUNT]);
     assert!(vm.code_banks.is_empty());
@@ -78,19 +73,30 @@ pub fn test_op(vm: &mut VM, text: &str, bytes: &[u8], expected: VMDump, memory: 
         assert_eq!(vm.pc, pc, "{} pc", text);
     }
     if let Some(bytes) = memory {
-        let mut mismatches = String::new();
-        for (i, &actual) in vm.memory.iter().enumerate() {
-            let expected = bytes[i];
-            if expected != actual {
-                mismatches.push_str(&format!(
-                    "{:04X}: {:02X} != {:02X} | {}: {} != {}\n",
-                    i, expected, actual, i, expected, actual
-                ));
-            }
+        compare_memory(text, &vm.memory, bytes);
+    }
+}
+
+fn compare_memory(text: &str, lhs: &[u8], rhs: &[u8]) {
+    if lhs.len() != rhs.len() {
+        panic!(
+            "Memory comparison failed, different sizes: {} != {}",
+            lhs.len(),
+            rhs.len()
+        );
+    }
+    let mut mismatches = String::new();
+    for (i, &actual) in lhs.iter().enumerate() {
+        let expected = rhs[i];
+        if expected != actual {
+            mismatches.push_str(&format!(
+                "{:04X}: {:02X} != {:02X} | {}: {} != {}\n",
+                i, expected, actual, i, expected, actual
+            ));
         }
-        if !mismatches.is_empty() {
-            panic!("Memory comparison failed for {}:\n{}", text, mismatches)
-        }
+    }
+    if !mismatches.is_empty() {
+        panic!("Memory comparison failed for {}:\n{}", text, mismatches)
     }
 }
 

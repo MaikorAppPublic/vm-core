@@ -428,12 +428,18 @@ mod test {
             address::SPRITE_TABLE,
             address::PALETTES + sizes::PALETTES_TOTAL
         );
-        assert_eq!(address::LAYERS, address::SPRITE_TABLE + sizes::SPRITE_TABLE);
+        assert_eq!(
+            address::LAYER_HEADERS,
+            address::SPRITE_TABLE + sizes::SPRITE_TABLE
+        );
         assert_eq!(
             address::LAYERS,
             address::LAYER_HEADERS + sizes::LAYERS_HEADER
         );
-        assert_eq!(address::CODE_BANK_ID, address::LAYERS + sizes::LAYER_TOTAL);
+        assert_eq!(
+            address::CODE_BANK_ID,
+            address::LAYERS + sizes::LAYERS_CONTENT
+        );
         assert_eq!(
             address::RAM_BANK_ID,
             address::CODE_BANK_ID + sizes::CODE_BANK_ID
