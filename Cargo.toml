@@ -9,6 +9,6 @@ repository = "https://github.com/raybritton/maikor-vm-core"
 readme = "README.md"
 homepage = "https://github.com/raybritton/rust-graphics-lib"
 keywords = ["game","gamedev","2d","vm"]
-categories = ["emulators","games"]
+categories = ["games"]
 
 [dependencies]
