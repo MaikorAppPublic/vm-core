@@ -1,9 +1,9 @@
 //Pre|Post Inc|Dec
 
 use crate::{direct, make_reg, reg_delta, setup_vm, test_single_op, Registers};
-use vm_core::constants::op_params::values;
-use vm_core::constants::ops::{CPY_REG_REG_BYTE, INC_REG_BYTE};
-use vm_core::constants::registers::{id, offset};
+use maikor_vm_core::constants::op_params::values;
+use maikor_vm_core::constants::ops::{CPY_REG_REG_BYTE, INC_REG_BYTE};
+use maikor_vm_core::constants::registers::{id, offset};
 
 #[test]
 fn test_ppid() {

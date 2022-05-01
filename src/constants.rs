@@ -36,9 +36,9 @@ pub mod mem {
         //(8b X, 8b Y, 9b tile id, 1b flipV, 1b flipH, 2b palette, 1b size, 2b order)
         pub const SPRITE_TABLE: usize = 255 * 4;
         //4 layers, each header is made of 3 bytes (8b X, 8b Y, 1b visible)
-        pub const LAYER_HEADER: usize = 3 * 4;
+        pub const LAYERS_HEADER: usize = 3 * 4;
         //4 layers, each made of 1320 (44x30) tiles, each made of 2 bytes (9b tile id, 1b flipV, 1b flipH, 2b palette, 3b ?)
-        pub const LAYER_CONTENT: usize = 1320 * 2 * 4;
+        pub const LAYERS_CONTENT: usize = 1320 * 2 * 4;
         //4 palettes, each made of 15 colors, each color is 3 bytes
         pub const PALETTE: usize = 15 * 3;
         pub const PALETTES_TOTAL: usize = 15 * 3 * 4;
@@ -50,7 +50,7 @@ pub mod mem {
         pub const SP: usize = 2;
         pub const FP: usize = 2;
         pub const ATLAS_TOTAL: usize = ATLAS + ATLAS + ATLAS1_BANK_ID + ATLAS2_BANK_ID;
-        pub const LAYER_TOTAL: usize = LAYER_CONTENT + LAYER_HEADER;
+        pub const LAYER_TOTAL: usize = LAYERS_CONTENT + LAYERS_HEADER;
         pub const GRAPHICS_TOTAL: usize = LAYER_TOTAL + SPRITE_TABLE + PALETTES_TOTAL + ATLAS_TOTAL;
         pub const SYSTEM_TOTAL: usize = CODE + RAM + CODE_BANK_ID + RAM_BANK_ID + STACK + SP + FP;
         pub const HARDWARE_TOTAL: usize = SOUND + INPUT + SAVE_BANK_ID + SAVE_BANK;
@@ -128,8 +128,6 @@ pub mod registers {
     }
     
     pub mod id {
-        use crate::constants::registers::id;
-
         pub const AH: usize = 0;
         pub const AL: usize = 1;
         pub const BH: usize = 2;
@@ -146,19 +144,19 @@ pub mod registers {
 
         pub const fn name(value: u8) -> &'static str {
             match value as usize {
-                id::AH => "AH",
-                id::AL => "AL",
-                id::BH => "BH",
-                id::BL => "BL",
-                id::CH => "CH",
-                id::CL => "CL",
-                id::DH => "DH",
-                id::DL => "DL",
-                id::AX => "AX",
-                id::BX => "BX",
-                id::CX => "CX",
-                id::DX => "DX",
-                id::FLAGS => "FLG",
+                AH => "AH",
+                AL => "AL",
+                BH => "BH",
+                BL => "BL",
+                CH => "CH",
+                CL => "CL",
+                DH => "DH",
+                DL => "DL",
+                AX => "AX",
+                BX => "BX",
+                CX => "CX",
+                DX => "DX",
+                FLAGS => "FLG",
                 _ => "?"
             }
         }
@@ -430,13 +428,10 @@ mod test {
             address::SPRITE_TABLE,
             address::PALETTES + sizes::PALETTES_TOTAL
         );
-        assert_eq!(
-            address::LAYER_HEADERS,
-            address::SPRITE_TABLE + sizes::SPRITE_TABLE
-        );
+        assert_eq!(address::LAYERS, address::SPRITE_TABLE + sizes::SPRITE_TABLE);
         assert_eq!(
             address::LAYERS,
-            address::LAYER_HEADERS + sizes::LAYER_HEADERS
+            address::LAYER_HEADERS + sizes::LAYERS_HEADER
         );
         assert_eq!(address::CODE_BANK_ID, address::LAYERS + sizes::LAYER_TOTAL);
         assert_eq!(

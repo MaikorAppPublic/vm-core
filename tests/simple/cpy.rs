@@ -2,12 +2,12 @@ use crate::{
     direct, mem_delta, mem_delta_w, reg_delta, reg_delta_w, setup_vm, test_single_op,
     test_single_op_m, Memory, Registers,
 };
-use vm_core::constants::ops::{
+use maikor_vm_core::constants::ops::{
     CPY_ADDR_ADDR_BYTE, CPY_ADDR_ADDR_WORD, CPY_ADDR_NUM_BYTE, CPY_ADDR_NUM_WORD,
     CPY_ADDR_REG_BYTE, CPY_ADDR_REG_WORD, CPY_REG_ADDR_BYTE, CPY_REG_ADDR_WORD, CPY_REG_NUM_BYTE,
     CPY_REG_NUM_WORD, CPY_REG_REG_BYTE, CPY_REG_REG_WORD,
 };
-use vm_core::constants::registers::offset;
+use maikor_vm_core::constants::registers::offset;
 
 #[test]
 fn test_all_cpy() {

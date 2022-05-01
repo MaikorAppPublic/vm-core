@@ -1,14 +1,14 @@
-use vm_core::constants::{mem, registers};
-use vm_core::VM;
+use maikor_vm_core::constants::{mem, registers, SAVE_COUNT};
+use maikor_vm_core::VM;
 
 mod simple;
 
 type Registers = [u8; registers::SIZE];
 type Memory = [u8; mem::TOTAL];
 pub mod direct {
-    use vm_core::constants::op_params::values::REGISTER;
-    use vm_core::constants::registers::id;
     use crate::make_reg;
+    use maikor_vm_core::constants::op_params::values::REGISTER;
+    use maikor_vm_core::constants::registers::id;
 
     pub const AH: u8 = make_reg(id::AH, REGISTER);
     pub const AL: u8 = make_reg(id::AL, REGISTER);
@@ -25,9 +25,9 @@ pub mod direct {
 }
 
 pub mod indirect {
-    use vm_core::constants::op_params::values::INDIRECT;
-    use vm_core::constants::registers::id;
     use crate::make_reg;
+    use maikor_vm_core::constants::op_params::values::INDIRECT;
+    use maikor_vm_core::constants::registers::id;
 
     pub const AH: u8 = make_reg(id::AH, INDIRECT);
     pub const AL: u8 = make_reg(id::AL, INDIRECT);
@@ -49,7 +49,7 @@ pub fn setup_vm() -> VM {
     );
     assert_eq!(vm.memory, [0; mem::TOTAL]);
     assert_eq!(vm.pc, 0);
-    assert_eq!(vm.save_dirty_flag, [false; 255]);
+    assert_eq!(vm.save_dirty_flag, [false; SAVE_COUNT]);
     assert!(vm.code_banks.is_empty());
     assert!(vm.ram_banks.is_empty());
     assert!(vm.atlas_banks.is_empty());
@@ -69,13 +69,7 @@ pub const fn make_reg(id: usize, param: u8) -> u8 {
     (id as u8) + param
 }
 
-pub fn test_op(
-    vm: &mut VM,
-    text: &str,
-    bytes: &[u8],
-    expected: VMDump,
-    memory: Option<&Memory>,
-) {
+pub fn test_op(vm: &mut VM, text: &str, bytes: &[u8], expected: VMDump, memory: Option<&Memory>) {
     vm.execute_op(bytes);
     assert_eq!(vm.registers, expected.registers, "{} registers", text);
     assert_eq!(vm.get_sp(), expected.sp, "{} sp", text);
@@ -88,7 +82,10 @@ pub fn test_op(
         for (i, &actual) in vm.memory.iter().enumerate() {
             let expected = bytes[i];
             if expected != actual {
-                mismatches.push_str(&format!("{:04X}: {:02X} != {:02X} | {}: {} != {}\n", i, expected, actual, i, expected, actual));
+                mismatches.push_str(&format!(
+                    "{:04X}: {:02X} != {:02X} | {}: {} != {}\n",
+                    i, expected, actual, i, expected, actual
+                ));
             }
         }
         if !mismatches.is_empty() {
@@ -121,7 +118,14 @@ pub fn reg_delta_w(registers: &mut Registers, offset: usize, new_value: u16) -> 
     registers.clone()
 }
 
-fn test_single_op(vm: &mut VM, i: usize, op: &str, params: &str, bytes: &[u8], registers: Registers) {
+fn test_single_op(
+    vm: &mut VM,
+    i: usize,
+    op: &str,
+    params: &str,
+    bytes: &[u8],
+    registers: Registers,
+) {
     let dump = VMDump {
         registers,
         ..VMDump::default()

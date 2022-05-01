@@ -2,8 +2,8 @@ use crate::{
     direct, indirect, mem_delta, mem_delta_w, reg_delta, reg_delta_w, setup_vm, test_single_op,
     test_single_op_m, Memory, Registers,
 };
-use vm_core::constants::ops::{INC_REG_BYTE, INC_REG_WORD};
-use vm_core::constants::registers::offset;
+use maikor_vm_core::constants::ops::{INC_REG_BYTE, INC_REG_WORD};
+use maikor_vm_core::constants::registers::offset;
 
 #[test]
 fn test_all_inc() {
