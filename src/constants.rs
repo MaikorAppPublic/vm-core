@@ -88,6 +88,9 @@ pub mod mem {
     pub const TOTAL: usize = 0xFFFF;
 }
 
+pub const SAVE_COUNT: usize = 16;
+pub const MAIKOR_VER: [u8; 2] = [0, 1];
+
 #[rustfmt::skip]
 pub mod input {
     pub const UP: usize =    0b00000001; 

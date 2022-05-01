@@ -1,5 +1,5 @@
 use crate::constants::graphics::SPRITE_COUNT;
-use crate::constants::{mem, ops, registers};
+use crate::constants::{mem, ops, registers, SAVE_COUNT};
 use crate::mem::{address, sizes};
 use std::collections::VecDeque;
 
@@ -19,7 +19,7 @@ pub struct VM {
     pub ram_banks: Vec<[u8; mem::sizes::RAM_BANK]>,
     pub code_banks: Vec<[u8; mem::sizes::CODE_BANK]>,
     pub save_banks: Vec<[u8; mem::sizes::SAVE_BANK]>,
-    pub save_dirty_flag: [bool; 255],
+    pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; mem::sizes::ATLAS]>,
 }
 
@@ -41,7 +41,7 @@ impl VM {
             ram_banks: vec![],
             code_banks: vec![],
             save_banks: vec![],
-            save_dirty_flag: [false; 255],
+            save_dirty_flag: [false; SAVE_COUNT],
             atlas_banks: vec![],
         }
     }
