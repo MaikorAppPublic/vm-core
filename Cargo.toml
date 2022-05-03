@@ -5,9 +5,9 @@ edition = "2021"
 authors = ["Ray Britton <raybritton@pm.me>"]
 description = "VM for playing Maikor games"
 license = "MIT"
-repository = "https://github.com/raybritton/maikor-vm-core"
+repository = "https://github.com/MaikorAppPublic/vm-core"
 readme = "README.md"
-homepage = "https://github.com/raybritton/rust-graphics-lib"
+homepage = "https://maikor.app"
 keywords = ["game","gamedev","2d","vm"]
 categories = ["games"]
 
