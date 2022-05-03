@@ -26,7 +26,7 @@ Build tools
 * [vm-core](https://github.com/MaikorAppPublic/vm-core)
   * Executes Maikor games
 * [vm-interface](https://github.com/MaikorAppPublic/vm-interface)
-  * Acts as hardware emulation layer for Maikor, it converts VM memory into graphics and inputs into VM memory 
+  * Acts as hardware simulation layer for the VM 
 * [desktop-app](https://github.com/MaikorAppPublic/desktop-app)
   * Host program for Windows, macOS and Linux
 * [android-app](https://github.com/MaikorAppPublic/android-app)
