@@ -33,11 +33,11 @@ pub mod mem {
         pub const SAVE_BANK: usize = 4096;
         pub const SPRITE: usize = 4;
         //255 sprites, each taking 4 bytes
-        //(8b X, 8b Y, 9b tile id, 1b flipV, 1b flipH, 2b palette, 1b size, 2b order)
+        //(8b X, 8b Y, 9b tile id, 1b flipV, 1b flipH, 2b palette, 1b src size, 2b order, [1b half alpha, 1b double dst size, 2b rotation])
         pub const SPRITE_TABLE: usize = 255 * 4;
-        //4 layers, each header is made of 3 bytes (8b X, 8b Y, 1b visible)
+        //4 layers, each header is made of 3 bytes (8b X, 8b Y, 1b visible, 7b?)
         pub const LAYERS_HEADER: usize = 3 * 4;
-        //4 layers, each made of 1320 (44x30) tiles, each made of 2 bytes (9b tile id, 1b flipV, 1b flipH, 2b palette, 3b ?)
+        //4 layers, each made of 1320 (44x30) tiles, each made of 2 bytes (9b tile id, 1b flipV, 1b flipH, 2b palette, 1b half alpha, 2b rotation)
         pub const LAYERS_CONTENT: usize = 1320 * 2 * 4;
         //4 palettes, each made of 15 colors, each color is 3 bytes
         pub const PALETTE: usize = 15 * 3;
