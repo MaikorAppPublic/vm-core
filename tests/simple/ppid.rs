@@ -1,6 +1,6 @@
 //Pre|Post Inc|Dec
 
-use crate::{direct, make_reg, reg_delta, setup_vm, test_single_op, Registers};
+use crate::{direct, make_reg, reg_delta, setup_vm, test_single_op, RegistersOp};
 use maikor_vm_core::constants::op_params::values;
 use maikor_vm_core::constants::ops::{CPY_REG_REG_BYTE, INC_REG_BYTE};
 use maikor_vm_core::constants::registers::{id, offset};
@@ -19,7 +19,7 @@ fn test_with_inc_b() {
     let postd_al = make_reg(id::AL, values::POST_DEC);
     let mut vm = setup_vm();
     let mut registers = vm.registers;
-    let list: Vec<(&str, Vec<u8>, fn(&mut Registers) -> Registers)> = vec![
+    let list: Vec<RegistersOp> = vec![
         ("+R", vec![INC_REG_BYTE, prei_al], |r| {
             reg_delta(r, offset::AL, 2)
         }),
@@ -51,7 +51,7 @@ fn test_with_cpy_b() {
     let mut vm = setup_vm();
     vm.registers[offset::AL] = 4;
     let mut registers = vm.registers;
-    let list: Vec<(&str, Vec<u8>, fn(&mut Registers) -> Registers)> = vec![
+    let list: Vec<RegistersOp> = vec![
         //first direct, second changes
         ("R,+R", vec![CPY_REG_REG_BYTE, direct::BL, prei_al], |r| {
             reg_delta(r, offset::BL, 5);

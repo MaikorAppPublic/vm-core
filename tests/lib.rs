@@ -3,8 +3,12 @@ use maikor_vm_core::VM;
 
 mod simple;
 
+type MemoryOp = (&'static str, Vec<u8>, fn(&mut Memory) -> Memory);
+type RegistersOp = (&'static str, Vec<u8>, fn(&mut Registers) -> Registers);
+
 type Registers = [u8; registers::SIZE];
 type Memory = [u8; mem::TOTAL];
+
 pub mod direct {
     use crate::make_reg;
     use maikor_vm_core::constants::op_params::values::REGISTER;
@@ -102,26 +106,26 @@ fn compare_memory(text: &str, lhs: &[u8], rhs: &[u8]) {
 
 pub fn mem_delta(memory: &mut Memory, offset: usize, new_value: u8) -> Memory {
     memory[offset] = new_value;
-    memory.clone()
+    *memory
 }
 
 pub fn mem_delta_w(memory: &mut Memory, offset: usize, new_value: u16) -> Memory {
     let bytes = new_value.to_be_bytes();
     memory[offset] = bytes[0];
     memory[offset + 1] = bytes[1];
-    memory.clone()
+    *memory
 }
 
 pub fn reg_delta(registers: &mut Registers, offset: usize, new_value: u8) -> Registers {
     registers[offset] = new_value;
-    registers.clone()
+    *registers
 }
 
 pub fn reg_delta_w(registers: &mut Registers, offset: usize, new_value: u16) -> Registers {
     let bytes = new_value.to_be_bytes();
     registers[offset] = bytes[0];
     registers[offset + 1] = bytes[1];
-    registers.clone()
+    *registers
 }
 
 fn test_single_op(

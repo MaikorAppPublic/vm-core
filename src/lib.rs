@@ -24,6 +24,7 @@ pub struct VM {
 }
 
 impl VM {
+    #[allow(clippy::new_without_default)] //not necessary
     pub fn new() -> Self {
         let mut registers = [0; registers::SIZE];
         registers[registers::offset::FLAGS] = registers::flags::DEFAULT;
@@ -81,15 +82,15 @@ impl VM {
     pub fn dump(&self) -> String {
         format!(
             "{}\n{}\n{}",
-            format!(
+            format_args!(
                 "AH: {:02X}  AL: {:02X}  BH: {:02X}  BL: {:02X}",
                 self.registers[0], self.registers[1], self.registers[2], self.registers[3]
             ),
-            format!(
+            format_args!(
                 "CH: {:02X}  CL: {:02X}  DH: {:02X}  DL: {:02X}",
                 self.registers[4], self.registers[5], self.registers[6], self.registers[7]
             ),
-            format!(
+            format_args!(
                 "FLG: {:02X} SP: {:04X} FP: {:04X} PC: {:04X}",
                 self.registers[8],
                 self.get_sp(),

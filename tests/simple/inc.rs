@@ -1,6 +1,6 @@
 use crate::{
     direct, indirect, mem_delta, mem_delta_w, reg_delta, reg_delta_w, setup_vm, test_single_op,
-    test_single_op_m, Memory, Registers,
+    test_single_op_m, MemoryOp, RegistersOp,
 };
 use maikor_vm_core::constants::ops::{INC_REG_BYTE, INC_REG_WORD};
 use maikor_vm_core::constants::registers::offset;
@@ -17,11 +17,11 @@ fn test_inc_b() {
     let name = "INC.B";
     let mut vm = setup_vm();
     let mut registers = vm.registers;
-    let list: Vec<(&str, &[u8], fn(&mut Registers) -> Registers)> = vec![
-        ("R", &[INC_REG_BYTE, direct::AL], |r| {
+    let list: Vec<RegistersOp> = vec![
+        ("R", vec![INC_REG_BYTE, direct::AL], |r| {
             reg_delta(r, offset::AL, 1)
         }),
-        ("R", &[INC_REG_BYTE, direct::AL], |r| {
+        ("R", vec![INC_REG_BYTE, direct::AL], |r| {
             reg_delta(r, offset::AL, 2)
         }),
     ];
@@ -34,11 +34,11 @@ fn test_inc_w() {
     let name = "INC.W";
     let mut vm = setup_vm();
     let mut registers = vm.registers;
-    let list: Vec<(&str, &[u8], fn(&mut Registers) -> Registers)> = vec![
-        ("R", &[INC_REG_WORD, direct::BX], |r| {
+    let list: Vec<RegistersOp> = vec![
+        ("R", vec![INC_REG_WORD, direct::BX], |r| {
             reg_delta_w(r, offset::BX, 1)
         }),
-        ("R", &[INC_REG_WORD, direct::BX], |r| {
+        ("R", vec![INC_REG_WORD, direct::BX], |r| {
             reg_delta_w(r, offset::BX, 2)
         }),
     ];
@@ -53,11 +53,11 @@ fn test_inc_b_indirect() {
     vm.registers[offset::AL] = 255;
     let registers = vm.registers;
     let mut memory = vm.memory;
-    let list: Vec<(&str, &[u8], fn(&mut Memory) -> Memory)> = vec![
-        ("Ri", &[INC_REG_BYTE, indirect::AX], |m| {
+    let list: Vec<MemoryOp> = vec![
+        ("Ri", vec![INC_REG_BYTE, indirect::AX], |m| {
             mem_delta(m, 255, 1)
         }),
-        ("Ri", &[INC_REG_BYTE, indirect::AX], |m| {
+        ("Ri", vec![INC_REG_BYTE, indirect::AX], |m| {
             mem_delta(m, 255, 2)
         }),
     ];
@@ -73,11 +73,11 @@ fn test_inc_w_indirect() {
     vm.registers[offset::BL] = 10;
     let registers = vm.registers;
     let mut memory = vm.memory;
-    let list: Vec<(&str, &[u8], fn(&mut Memory) -> Memory)> = vec![
-        ("Ri", &[INC_REG_WORD, indirect::BX], |m| {
+    let list: Vec<MemoryOp> = vec![
+        ("Ri", vec![INC_REG_WORD, indirect::BX], |m| {
             mem_delta_w(m, 2570, 1)
         }),
-        ("Ri", &[INC_REG_WORD, indirect::BX], |m| {
+        ("Ri", vec![INC_REG_WORD, indirect::BX], |m| {
             mem_delta_w(m, 2570, 2)
         }),
     ];

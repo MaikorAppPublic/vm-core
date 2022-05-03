@@ -460,6 +460,7 @@ mod test {
 
     #[test]
     #[allow(unused_comparisons)]
+    #[allow(clippy::absurd_extreme_comparisons)] //for testing
     fn check_all_commands_have_byte_counts() {
         for op in ops::ALL {
             assert!(ops::get_byte_count(op) >= 0, "{:02X}", op);
