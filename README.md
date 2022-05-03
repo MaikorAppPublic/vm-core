@@ -45,7 +45,7 @@ Build tools
   * For reading and writing Maikor game files 
  
 
-## maikor-vm-core
+## vm-core
 
 This is a library that executes Maikor game files in a VM. It won't run by itself though, instead it requires an external program to manage timing and vsync to keep the code execution speed similar between platforms.
 
