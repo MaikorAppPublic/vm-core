@@ -1,5 +1,9 @@
 ## Pre-alpha
 
+### 0.1.2
+
+- Update language dep
+
 ### 0.1.1
 
 - *BREAKING CHANGE*

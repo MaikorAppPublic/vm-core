@@ -94,14 +94,6 @@ pub fn sub_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 
 // MUL
 
-pub fn carrying_mul_byte(this: Byte, other: Byte, carry: bool) -> (Byte, bool) {
-    carrying_math_num(this, other, carry, u8::overflowing_mul)
-}
-
-pub fn carrying_mul_word(this: Word, other: Word, carry: bool) -> (Word, bool) {
-    carrying_math_num(this, other, carry, u16::overflowing_mul)
-}
-
 pub fn mul_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
     math_num(this, other, u8::overflowing_mul)
 }
@@ -111,14 +103,6 @@ pub fn mul_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 }
 
 // DIV
-
-pub fn carrying_div_byte(this: Byte, other: Byte, carry: bool) -> (Byte, bool) {
-    carrying_math_num(this, other, carry, u8::overflowing_div)
-}
-
-pub fn carrying_div_word(this: Word, other: Word, carry: bool) -> (Word, bool) {
-    carrying_math_num(this, other, carry, u16::overflowing_div)
-}
 
 pub fn div_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
     math_num(this, other, u8::overflowing_div)
@@ -130,14 +114,6 @@ pub fn div_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 
 // MULS
 
-pub fn carrying_muls_byte(this: Byte, other: Byte, carry: bool) -> (Byte, bool) {
-    carrying_math_num(this, other, carry, i8::overflowing_mul)
-}
-
-pub fn carrying_muls_word(this: Word, other: Word, carry: bool) -> (Word, bool) {
-    carrying_math_num(this, other, carry, i16::overflowing_mul)
-}
-
 pub fn muls_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
     math_num(this, other, i8::overflowing_mul)
 }
@@ -147,14 +123,6 @@ pub fn muls_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 }
 
 // DIVS
-
-pub fn carrying_divs_byte(this: Byte, other: Byte, carry: bool) -> (Byte, bool) {
-    carrying_math_num(this, other, carry, i8::overflowing_div)
-}
-
-pub fn carrying_divs_word(this: Word, other: Word, carry: bool) -> (Word, bool) {
-    carrying_math_num(this, other, carry, i16::overflowing_div)
-}
 
 pub fn divs_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
     math_num(this, other, i8::overflowing_div)

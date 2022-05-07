@@ -54,7 +54,7 @@ impl VM {
         if register.size != 1 {
             self.fail(format!(
                 "Invalid {op_name} param: {}, must be byte register",
-                registers::id::name(register.addr as u8),
+                registers::id::to_name(register.addr as u8).unwrap(),
             ));
         }
     }
@@ -68,7 +68,7 @@ impl VM {
         if register.size != 2 {
             self.fail(format!(
                 "Invalid {op_name} param: {}, {}",
-                registers::id::name(register.addr as u8),
+                registers::id::to_name(register.addr as u8).unwrap(),
                 reason.text()
             ));
         }

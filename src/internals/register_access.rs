@@ -31,6 +31,7 @@ impl DirectRegisterAccess<Byte> for VM {
         self.registers[addr] = value.0;
     }
 }
+
 impl DirectRegisterAccess<Word> for VM {
     fn read_register(&self, addr: usize) -> Word {
         u16::from_be_bytes([self.registers[addr], self.registers[addr + 1]]).into()
@@ -42,6 +43,7 @@ impl DirectRegisterAccess<Word> for VM {
         self.registers[addr + 1] = bytes[1];
     }
 }
+
 impl RegisterAccess<Byte> for VM {
     fn write(&mut self, op_name: &'static str, dst: &Register, value: Byte) {
         if dst.is_indirect {
@@ -61,6 +63,7 @@ impl RegisterAccess<Byte> for VM {
         }
     }
 }
+
 impl RegisterAccess<Word> for VM {
     fn write(&mut self, op_name: &'static str, dst: &Register, value: Word) {
         self.required_extended_register(op_name, WordRegisterErrorReason::Required, dst);

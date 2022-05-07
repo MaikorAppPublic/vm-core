@@ -24,6 +24,8 @@ See more at [maikor.app](https://maikor.app)
 
 [Build tools](https://github.com/MaikorAppPublic/build-tools)
 
+[REPL](https://play.vm.maikor.app)
+
 ### Project breakdown
 
 #### Major
@@ -37,6 +39,8 @@ See more at [maikor.app](https://maikor.app)
   * Host program for iOS
 * [desktop-ide](https://github.com/MaikorAppPublic/desktop-ide)
   * IDE program for Windows, macOS and Linux
+* [web-repl](https://github.com/MaikorAppPublic/web-repl)
+  * Web based REPL
 
 #### Minor
 * [vm-interface](https://github.com/MaikorAppPublic/vm-interface)
@@ -51,7 +55,8 @@ See more at [maikor.app](https://maikor.app)
   * For reading and writing Maikor game files
 * [maikor-language](https://github.com/MaikorAppPublic/language)
   * OP names, memory addresses and platform requirements
-
+* [vm-interface-wasm](https://github.com/MaikorAppPublic/vm-interface-wasm)
+  * WASM compatible wrapper for `vm-interface`
 
 ## vm-core
 
