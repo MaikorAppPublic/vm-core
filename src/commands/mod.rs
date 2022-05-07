@@ -38,7 +38,7 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
-        self.write(name, &dst, src);
+        self.write(name, dst, src);
         self.set_flags(src);
     }
 
@@ -113,9 +113,9 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
-        let dst_value: T = self.read(name, &dst);
+        let dst_value: T = self.read(name, dst);
         let (result, carried) = method(dst_value, src, self.check_flag(flags::CARRY));
-        self.write(name, &dst, result);
+        self.write(name, dst, result);
         let overflowed = is_overflow_add(
             dst_value.is_first_bit_set(),
             src.is_first_bit_set(),
@@ -135,9 +135,9 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
-        let dst_value: T = self.read(name, &dst);
+        let dst_value: T = self.read(name, dst);
         let (result, carried) = method(dst_value, src, self.check_flag(flags::CARRY));
-        self.write(name, &dst, result);
+        self.write(name, dst, result);
         let overflowed = is_overflow_sub(
             dst_value.is_first_bit_set(),
             src.is_first_bit_set(),

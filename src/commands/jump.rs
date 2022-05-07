@@ -11,7 +11,7 @@ impl VM {
     }
 
     pub fn jump_reg(&mut self, reg: &Register) {
-        let addr: Word = self.read(full::JMP_REG, &reg);
+        let addr: Word = self.read(full::JMP_REG, reg);
         self.jump(addr.to_address());
     }
 
