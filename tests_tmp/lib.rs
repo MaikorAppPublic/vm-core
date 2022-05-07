@@ -1,4 +1,4 @@
-use maikor_vm_core::constants::{mem, registers, SAVE_COUNT};
+use maikor_language::{mem, registers, SAVE_COUNT};
 use maikor_vm_core::VM;
 
 mod simple;
@@ -11,8 +11,8 @@ type Memory = [u8; mem::TOTAL];
 
 pub mod direct {
     use crate::make_reg;
-    use maikor_vm_core::constants::op_params::values::REGISTER;
-    use maikor_vm_core::constants::registers::id;
+    use maikor_language::op_params::REGISTER;
+    use maikor_language::registers::id;
 
     pub const AH: u8 = make_reg(id::AH, REGISTER);
     pub const AL: u8 = make_reg(id::AL, REGISTER);
@@ -30,8 +30,8 @@ pub mod direct {
 
 pub mod indirect {
     use crate::make_reg;
-    use maikor_vm_core::constants::op_params::values::INDIRECT;
-    use maikor_vm_core::constants::registers::id;
+    use maikor_language::op_params::INDIRECT;
+    use maikor_language::registers::id;
 
     pub const AH: u8 = make_reg(id::AH, INDIRECT);
     pub const AL: u8 = make_reg(id::AL, INDIRECT);
@@ -43,6 +43,21 @@ pub mod indirect {
     pub const BX: u8 = make_reg(id::BX, INDIRECT);
     pub const CX: u8 = make_reg(id::CX, INDIRECT);
     pub const DX: u8 = make_reg(id::DX, INDIRECT);
+}
+
+pub mod flags {
+    use maikor_language::registers::flags::CARRY as C;
+    use maikor_language::registers::flags::GREATER_THAN as G;
+    use maikor_language::registers::flags::INTERRUPTS as I;
+    use maikor_language::registers::flags::LESS_THAN as L;
+    use maikor_language::registers::flags::OVERFLOW as O;
+    use maikor_language::registers::flags::SIGNED as S;
+    use maikor_language::registers::flags::ZERO as Z;
+
+    pub const DEFAULT: u8 = maikor_language::registers::FLG_DEFAULT;
+
+    pub const POSITIVE_NUM: u8 = I;
+    pub const NEGATIVE_NUM: u8 = I | S;
 }
 
 pub fn setup_vm() -> VM {
@@ -104,24 +119,24 @@ fn compare_memory(text: &str, lhs: &[u8], rhs: &[u8]) {
     }
 }
 
-pub fn mem_delta(memory: &mut Memory, offset: usize, new_value: u8) -> Memory {
+pub fn mem_change(memory: &mut Memory, offset: usize, new_value: u8) -> Memory {
     memory[offset] = new_value;
     *memory
 }
 
-pub fn mem_delta_w(memory: &mut Memory, offset: usize, new_value: u16) -> Memory {
+pub fn mem_change_w(memory: &mut Memory, offset: usize, new_value: u16) -> Memory {
     let bytes = new_value.to_be_bytes();
     memory[offset] = bytes[0];
     memory[offset + 1] = bytes[1];
     *memory
 }
 
-pub fn reg_delta(registers: &mut Registers, offset: usize, new_value: u8) -> Registers {
+pub fn reg_change(registers: &mut Registers, offset: usize, new_value: u8) -> Registers {
     registers[offset] = new_value;
     *registers
 }
 
-pub fn reg_delta_w(registers: &mut Registers, offset: usize, new_value: u16) -> Registers {
+pub fn reg_change_w(registers: &mut Registers, offset: usize, new_value: u16) -> Registers {
     let bytes = new_value.to_be_bytes();
     registers[offset] = bytes[0];
     registers[offset + 1] = bytes[1];

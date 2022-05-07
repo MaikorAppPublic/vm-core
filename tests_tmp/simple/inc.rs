@@ -1,9 +1,9 @@
 use crate::{
-    direct, indirect, mem_delta, mem_delta_w, reg_delta, reg_delta_w, setup_vm, test_single_op,
-    test_single_op_m, MemoryOp, RegistersOp,
+    direct, flags, indirect, mem_change, mem_change_w, reg_change, reg_change_w, setup_vm,
+    test_single_op, test_single_op_m, MemoryOp, RegistersOp,
 };
-use maikor_vm_core::constants::ops::{INC_REG_BYTE, INC_REG_WORD};
-use maikor_vm_core::constants::registers::offset;
+use maikor_language::ops::{INC_REG_BYTE, INC_REG_WORD};
+use maikor_language::registers::offset;
 
 #[test]
 fn test_all_inc() {
@@ -19,10 +19,12 @@ fn test_inc_b() {
     let mut registers = vm.registers;
     let list: Vec<RegistersOp> = vec![
         ("R", vec![INC_REG_BYTE, direct::AL], |r| {
-            reg_delta(r, offset::AL, 1)
+            reg_change(r, offset::AL, 1);
+            reg_change(r, offset::FLAGS, flags::POSITIVE_NUM)
         }),
         ("R", vec![INC_REG_BYTE, direct::AL], |r| {
-            reg_delta(r, offset::AL, 2)
+            reg_change(r, offset::AL, 2);
+            reg_change(r, offset::FLAGS, flags::POSITIVE_NUM)
         }),
     ];
     for (i, op) in list.iter().enumerate() {
@@ -36,10 +38,10 @@ fn test_inc_w() {
     let mut registers = vm.registers;
     let list: Vec<RegistersOp> = vec![
         ("R", vec![INC_REG_WORD, direct::BX], |r| {
-            reg_delta_w(r, offset::BX, 1)
+            reg_change_w(r, offset::BX, 1)
         }),
         ("R", vec![INC_REG_WORD, direct::BX], |r| {
-            reg_delta_w(r, offset::BX, 2)
+            reg_change_w(r, offset::BX, 2)
         }),
     ];
     for (i, op) in list.iter().enumerate() {
@@ -55,10 +57,10 @@ fn test_inc_b_indirect() {
     let mut memory = vm.memory;
     let list: Vec<MemoryOp> = vec![
         ("Ri", vec![INC_REG_BYTE, indirect::AX], |m| {
-            mem_delta(m, 255, 1)
+            mem_change(m, 255, 1)
         }),
         ("Ri", vec![INC_REG_BYTE, indirect::AX], |m| {
-            mem_delta(m, 255, 2)
+            mem_change(m, 255, 2)
         }),
     ];
     for (i, op) in list.iter().enumerate() {
@@ -75,10 +77,10 @@ fn test_inc_w_indirect() {
     let mut memory = vm.memory;
     let list: Vec<MemoryOp> = vec![
         ("Ri", vec![INC_REG_WORD, indirect::BX], |m| {
-            mem_delta_w(m, 2570, 1)
+            mem_change_w(m, 2570, 1)
         }),
         ("Ri", vec![INC_REG_WORD, indirect::BX], |m| {
-            mem_delta_w(m, 2570, 2)
+            mem_change_w(m, 2570, 2)
         }),
     ];
     for (i, op) in list.iter().enumerate() {
