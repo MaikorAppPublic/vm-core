@@ -1,31 +1,31 @@
+use crate::register::Register;
+use crate::{address, sizes, VM};
+use maikor_language::registers;
+
+pub mod flags;
 pub mod memory_access;
 pub mod register_access;
 
-use crate::constants::registers;
-use crate::mem::{address, sizes};
-use crate::register::Register;
-use crate::VM;
-
 impl VM {
-    fn increment_register_byte(&mut self, addr: usize) {
-        self.registers[addr] = self.registers[addr].wrapping_add(1);
+    fn increase_register_byte(&mut self, addr: usize, amount: usize) {
+        self.registers[addr] = self.registers[addr].wrapping_add(amount as u8);
     }
 
-    fn decrement_register_byte(&mut self, addr: usize) {
-        self.registers[addr] = self.registers[addr].wrapping_sub(1);
+    fn decrement_register_byte(&mut self, addr: usize, amount: usize) {
+        self.registers[addr] = self.registers[addr].wrapping_sub(amount as u8);
     }
 
-    fn increment_register_word(&mut self, addr: usize) {
+    fn increment_register_word(&mut self, addr: usize, amount: usize) {
         let bytes = u16::from_be_bytes([self.registers[addr], self.registers[addr + 1]])
-            .wrapping_add(1)
+            .wrapping_add(amount as u16)
             .to_be_bytes();
         self.registers[addr] = bytes[0];
         self.registers[addr + 1] = bytes[1];
     }
 
-    fn decrement_register_word(&mut self, addr: usize) {
+    fn decrement_register_word(&mut self, addr: usize, amount: usize) {
         let bytes = u16::from_be_bytes([self.registers[addr], self.registers[addr + 1]])
-            .wrapping_sub(1)
+            .wrapping_sub(amount as u16)
             .to_be_bytes();
         self.registers[addr] = bytes[0];
         self.registers[addr + 1] = bytes[1];
@@ -36,17 +36,26 @@ impl VM {
         if reg.is_calc && reg.is_post == is_post {
             if reg.is_inc {
                 match reg.size {
-                    1 => self.increment_register_byte(reg.addr),
-                    2 => self.increment_register_word(reg.addr),
+                    1 => self.increase_register_byte(reg.addr, 1),
+                    2 => self.increment_register_word(reg.addr, 2),
                     _ => self.fail(format!("Invalid register size: {}", reg.addr)),
                 }
             } else {
                 match reg.size {
-                    1 => self.decrement_register_byte(reg.addr),
-                    2 => self.decrement_register_word(reg.addr),
+                    1 => self.decrement_register_byte(reg.addr, 1),
+                    2 => self.decrement_register_word(reg.addr, 2),
                     _ => self.fail(format!("Invalid register size: {}", reg.addr)),
                 }
             }
+        }
+    }
+
+    pub fn required_byte_register(&mut self, op_name: &'static str, register: &Register) {
+        if register.size != 1 {
+            self.fail(format!(
+                "Invalid {op_name} param: {}, must be byte register",
+                registers::id::name(register.addr as u8),
+            ));
         }
     }
 

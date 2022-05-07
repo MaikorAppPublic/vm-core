@@ -1,7 +1,5 @@
-use crate::constants::mem;
-use crate::mem::address;
-use crate::types::{Address, AsByte, AsWord, Byte, Word};
-use crate::VM;
+use crate::types::{Address, Byte, Word};
+use crate::{address, mem, VM};
 
 impl VM {
     pub fn get_memory(&self, start: Address, length: usize) -> &[u8] {
@@ -20,29 +18,29 @@ pub trait MemoryAccess<T> {
 
 impl MemoryAccess<Byte> for VM {
     fn read_mem(&self, addr: Address) -> Byte {
-        self.memory[addr].as_byte()
+        self.memory[addr].into()
     }
 
     fn write_mem(&mut self, addr: Address, value: Byte) {
         self.memory[addr] = value.0;
         if is_inside_code_bank(addr) {
-            let code_bank = &mut self.code_banks[self.memory[mem::address::CODE_BANK_ID] as usize];
-            let code_bank_addr = addr - mem::address::CODE_BANK;
+            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_ID] as usize];
+            let code_bank_addr = addr - address::CODE_BANK;
             code_bank[code_bank_addr] = value.0;
         }
         if is_inside_ram_bank(addr) {
-            let ram_bank = &mut self.ram_banks[self.memory[mem::address::RAM_BANK_ID] as usize];
-            let ram_bank_addr = addr - mem::address::RAM_BANK;
+            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_ID] as usize];
+            let ram_bank_addr = addr - address::RAM_BANK;
             ram_bank[ram_bank_addr] = value.0;
         }
         if is_inside_save_bank(addr) {
-            let bank_id = self.memory[mem::address::SAVE_BANK_ID] as usize;
+            let bank_id = self.memory[address::SAVE_BANK_ID] as usize;
             let save_bank = &mut self.save_banks[bank_id];
-            let save_bank_addr = addr - mem::address::SAVE_BANK;
+            let save_bank_addr = addr - address::SAVE_BANK;
             save_bank[save_bank_addr] = value.0;
             self.save_dirty_flag[bank_id] = true;
         }
-        if addr == mem::address::CODE_BANK_ID {
+        if addr == address::CODE_BANK_ID {
             if value.as_usize() >= self.code_banks.len() {
                 self.fail(format!("Invalid code bank: {value}"));
             } else {
@@ -55,7 +53,7 @@ impl MemoryAccess<Byte> for VM {
                 }
             }
         }
-        if addr == mem::address::RAM_BANK_ID {
+        if addr == address::RAM_BANK_ID {
             if value.as_usize() >= self.ram_banks.len() {
                 self.fail(format!("Invalid ram bank: {value}"));
             } else {
@@ -68,7 +66,7 @@ impl MemoryAccess<Byte> for VM {
                 }
             }
         }
-        if addr == mem::address::SAVE_BANK_ID {
+        if addr == address::SAVE_BANK_ID {
             unsafe {
                 let dst = self
                     .get_memory_mut(address::SAVE_BANK, mem::sizes::SAVE_BANK)
@@ -77,7 +75,7 @@ impl MemoryAccess<Byte> for VM {
                 std::ptr::copy_nonoverlapping(src, dst, mem::sizes::SAVE_BANK);
             }
         }
-        if addr == mem::address::ATLAS1_BANK_ID {
+        if addr == address::ATLAS1_BANK_ID {
             if value.as_usize() >= self.atlas_banks.len() {
                 self.fail(format!("Invalid atlas bank: {value}"));
             } else {
@@ -90,7 +88,7 @@ impl MemoryAccess<Byte> for VM {
                 }
             }
         }
-        if addr == mem::address::ATLAS2_BANK_ID {
+        if addr == address::ATLAS2_BANK_ID {
             if value.as_usize() >= self.atlas_banks.len() {
                 self.fail(format!("Invalid atlas bank: {value}"));
             } else {
@@ -108,7 +106,7 @@ impl MemoryAccess<Byte> for VM {
 
 impl MemoryAccess<Word> for VM {
     fn read_mem(&self, addr: Address) -> Word {
-        u16::from_be_bytes([self.memory[addr], self.memory[addr + Address::ONE]]).as_word()
+        u16::from_be_bytes([self.memory[addr], self.memory[addr + Address::ONE]]).into()
     }
 
     fn write_mem(&mut self, addr: Address, value: Word) {
@@ -119,13 +117,13 @@ impl MemoryAccess<Word> for VM {
 }
 
 pub fn is_inside_code_bank(addr: Address) -> bool {
-    addr >= mem::address::CODE_BANK && addr < (mem::address::CODE_BANK + mem::sizes::CODE_BANK)
+    addr >= address::CODE_BANK && addr < (address::CODE_BANK + mem::sizes::CODE_BANK)
 }
 
 pub fn is_inside_ram_bank(addr: Address) -> bool {
-    addr >= mem::address::RAM_BANK && addr < (mem::address::RAM_BANK + mem::sizes::RAM_BANK)
+    addr >= address::RAM_BANK && addr < (address::RAM_BANK + mem::sizes::RAM_BANK)
 }
 
 pub fn is_inside_save_bank(addr: Address) -> bool {
-    addr >= mem::address::SAVE_BANK && addr < (mem::address::SAVE_BANK + mem::sizes::SAVE_BANK)
+    addr >= address::SAVE_BANK && addr < (address::SAVE_BANK + mem::sizes::SAVE_BANK)
 }

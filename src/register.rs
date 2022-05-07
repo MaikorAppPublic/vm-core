@@ -1,5 +1,4 @@
-use crate::constants::op_params::values::*;
-use crate::constants::registers;
+use maikor_language::registers;
 
 #[derive(Default, Debug, Clone, Eq, PartialEq)]
 pub struct Register {
@@ -41,6 +40,7 @@ impl Register {
     }
 
     fn read_meta(byte: u8) -> Register {
+        use maikor_language::op_params::*;
         return match byte & 0xF0 {
             REGISTER => Register {
                 ..Register::default()

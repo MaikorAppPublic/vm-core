@@ -1,5 +1,9 @@
 # Maikor
 
+>⚠️ Work in progress
+>
+> Links may be broken, features missing, etc
+
 *Cross platform 16 bit game system*
 
 See more at [maikor.app](https://maikor.app)
@@ -14,36 +18,40 @@ See more at [maikor.app](https://maikor.app)
 
 ### Make
 
-iOS IDE
+[iOS IDE](https://github.com/MaikorAppPublic/ios-app)
 
-Desktop IDE
+[Desktop IDE](https://github.com/MaikorAppPublic/desktop-ide)
 
-Build tools
+[Build tools](https://github.com/MaikorAppPublic/build-tools)
 
 ### Project breakdown
 
 #### Major
 * [vm-core](https://github.com/MaikorAppPublic/vm-core)
   * Executes Maikor games
-* [vm-interface](https://github.com/MaikorAppPublic/vm-interface)
-  * Acts as hardware simulation layer for the VM 
 * [desktop-app](https://github.com/MaikorAppPublic/desktop-app)
   * Host program for Windows, macOS and Linux
 * [android-app](https://github.com/MaikorAppPublic/android-app)
   * Host program for Android
 * [ios-app](https://github.com/MaikorAppPublic/ios-app)
   * Host program for iOS
+* [desktop-ide](https://github.com/MaikorAppPublic/desktop-ide)
+  * IDE program for Windows, macOS and Linux
 
 #### Minor
+* [vm-interface](https://github.com/MaikorAppPublic/vm-interface)
+  * Acts as hardware simulation layer for the VM
 * [vm-interface-android](https://github.com/MaikorAppPublic/vm-interface-android)
   * Android compatible wrapper for `vm-interface`
 * [vm-interface-ios](https://github.com/MaikorAppPublic/vm-interface-ios)
   * iOS compatible wrapper for `vm-interface`
 * [vm-desktop-simple](https://github.com/MaikorAppPublic/vm-desktop-simple)
   * Simple desktop program for testing Maikor games (it can't save, etc)
-* [vm-file](https://github.com/MaikorAppPublic/vm-file) 
-  * For reading and writing Maikor game files 
- 
+* [vm-file](https://github.com/MaikorAppPublic/vm-file)
+  * For reading and writing Maikor game files
+* [maikor-language](https://github.com/MaikorAppPublic/language)
+  * OP names, memory addresses and platform requirements
+
 
 ## vm-core
 

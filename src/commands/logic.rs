@@ -1,122 +1,71 @@
-use crate::internals::register_access::WrappedRegisterAccess;
+use crate::internals::register_access::RegisterAccess;
 use crate::register::Register;
-use crate::types::{BitLogic, Byte, Word};
+use crate::types::bitlogic::BitLogic;
+use crate::types::math::{and_byte, and_word, or_byte, or_word, xor_byte, xor_word};
+use crate::types::{Byte, Word};
 use crate::VM;
+use maikor_language::names::full;
 
 impl VM {
+    pub fn and_reg_num_byte(&mut self, dst: Register, src: Byte) {
+        self.change_reg(full::AND_REG_NUM_BYTE, &dst, src, and_byte);
+    }
+
+    pub fn and_reg_num_word(&mut self, dst: Register, src: Word) {
+        self.change_reg(full::AND_REG_NUM_WORD, &dst, src, and_word);
+    }
+
+    pub fn and_reg_reg_byte(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::AND_REG_REG_BYTE, dst, src, and_byte);
+    }
+
+    pub fn and_reg_reg_word(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::AND_REG_REG_WORD, dst, src, and_word);
+    }
+
+    pub fn or_reg_num_byte(&mut self, dst: Register, src: Byte) {
+        self.change_reg(full::OR_REG_NUM_BYTE, &dst, src, or_byte);
+    }
+
+    pub fn or_reg_num_word(&mut self, dst: Register, src: Word) {
+        self.change_reg(full::OR_REG_NUM_WORD, &dst, src, or_word);
+    }
+
+    pub fn or_reg_reg_byte(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::OR_REG_REG_BYTE, dst, src, or_byte);
+    }
+
+    pub fn or_reg_reg_word(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::OR_REG_REG_WORD, dst, src, or_word);
+    }
+
+    pub fn xor_reg_num_byte(&mut self, dst: Register, src: Byte) {
+        self.change_reg(full::XOR_REG_NUM_BYTE, &dst, src, xor_byte);
+    }
+
+    pub fn xor_reg_num_word(&mut self, dst: Register, src: Word) {
+        self.change_reg(full::XOR_REG_NUM_WORD, &dst, src, xor_word);
+    }
+
+    pub fn xor_reg_reg_byte(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::XOR_REG_REG_BYTE, dst, src, xor_byte);
+    }
+
+    pub fn xor_reg_reg_word(&mut self, dst: Register, src: Register) {
+        self.change_reg_with_reg(full::XOR_REG_REG_WORD, dst, src, xor_word);
+    }
+
     pub fn not_reg_byte(&mut self, reg: Register) {
         self.process_arg(&reg, false);
-        let value: Byte = self.read("NOT.B (R)", &reg);
-        self.write("NOT.B (R)", &reg, value.not());
+        let value: Byte = self.read(full::NOT_REG_BYTE, &reg);
+        self.write(full::NOT_REG_BYTE, &reg, value.not());
         self.process_arg(&reg, true);
     }
 
     pub fn not_reg_word(&mut self, reg: Register) {
         self.process_arg(&reg, false);
-        let value: Word = self.read("NOT.W (R)", &reg);
-        self.write("NOT.W (R)", &reg, value.not());
+        let value: Word = self.read(full::NOT_REG_WORD, &reg);
+        self.write(full::NOT_REG_WORD, &reg, value.not());
         self.process_arg(&reg, true);
-    }
-
-    pub fn and_reg_reg_byte(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Byte = self.read("AND.B (R,R)", &dst);
-        let src_value: Byte = self.read("AND.B (R,R)", &src);
-        self.write("AND.B (R,R)", &dst, dst_value.and(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn and_reg_reg_word(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Word = self.read("AND.W (R,R)", &dst);
-        let src_value: Word = self.read("AND.W (R,R)", &src);
-        self.write("AND.W (R,R)", &dst, dst_value.and(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn xor_reg_reg_byte(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Byte = self.read("XOR.B (R,R)", &dst);
-        let src_value: Byte = self.read("XOR.B (R,R)", &src);
-        self.write("XOR.B (R,R)", &dst, dst_value.xor(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn xor_reg_reg_word(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Word = self.read("XOR.W (R,R)", &dst);
-        let src_value: Word = self.read("XOR.W (R,R)", &src);
-        self.write("XOR.W (R,R)", &dst, dst_value.xor(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn or_reg_reg_byte(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Byte = self.read("OR.B (R,R)", &dst);
-        let src_value: Byte = self.read("OR.B (R,R)", &src);
-        self.write("OR.B (R,R)", &dst, dst_value.or(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn or_reg_reg_word(&mut self, dst: Register, src: Register) {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let dst_value: Word = self.read("OR.W (R,R)", &dst);
-        let src_value: Word = self.read("OR.W (R,R)", &src);
-        self.write("OR.W (R,R)", &dst, dst_value.or(src_value));
-        self.process_arg(&dst, true);
-        self.process_arg(&src, true);
-    }
-
-    pub fn and_reg_num_byte(&mut self, dst: Register, src: Byte) {
-        self.process_arg(&dst, false);
-        let dst_value: Byte = self.read("AND.B (R,N)", &dst);
-        self.write("AND.B (R,N)", &dst, dst_value.and(src));
-        self.process_arg(&dst, true);
-    }
-
-    pub fn and_reg_num_word(&mut self, dst: Register, src: Word) {
-        self.process_arg(&dst, false);
-        let dst_value: Word = self.read("AND.W (R,N)", &dst);
-        self.write("AND.W (R,N)", &dst, dst_value.and(src));
-        self.process_arg(&dst, true);
-    }
-
-    pub fn or_reg_num_byte(&mut self, dst: Register, src: Byte) {
-        self.process_arg(&dst, false);
-        let dst_value: Byte = self.read("OR.B (R,N)", &dst);
-        self.write("OR.B (R,N)", &dst, dst_value.or(src));
-        self.process_arg(&dst, true);
-    }
-
-    pub fn or_reg_num_word(&mut self, dst: Register, src: Word) {
-        self.process_arg(&dst, false);
-        let dst_value: Word = self.read("OR.W (R,N)", &dst);
-        self.write("OR.W (R,N)", &dst, dst_value.or(src));
-        self.process_arg(&dst, true);
-    }
-
-    pub fn xor_reg_num_byte(&mut self, dst: Register, src: Byte) {
-        self.process_arg(&dst, false);
-        let dst_value: Byte = self.read("XOR.B (R,N)", &dst);
-        self.write("XOR.B (R,N)", &dst, dst_value.xor(src));
-        self.process_arg(&dst, true);
-    }
-
-    pub fn xor_reg_num_word(&mut self, dst: Register, src: Word) {
-        self.process_arg(&dst, false);
-        let dst_value: Word = self.read("XOR.W (R,N)", &dst);
-        self.write("XOR.W (R,N)", &dst, dst_value.xor(src));
-        self.process_arg(&dst, true);
     }
 }

@@ -1,34 +1,37 @@
-use crate::constants::graphics::SPRITE_COUNT;
-use crate::constants::{mem, ops, registers, SAVE_COUNT};
+use crate::internals::memory_access::MemoryAccess;
 use crate::mem::{address, sizes};
+use crate::types::Byte;
+use maikor_language::constants::SPRITE_COUNT;
+use maikor_language::ops::get_byte_count;
+use maikor_language::{registers, SAVE_COUNT};
 use std::collections::VecDeque;
 
 mod commands;
-pub mod constants;
 mod execute_command;
 mod internals;
+mod mem;
 mod register;
-pub mod types;
+mod types;
 
 pub struct VM {
     pub registers: [u8; registers::SIZE],
     pub pc: u16,
-    //All changes MUST go through write_byte_mem
+    //All changes MUST go through debug_set_mem or debug_set_mem_range
     //otherwise banks won't change, etc
-    pub memory: [u8; mem::TOTAL],
-    pub ram_banks: Vec<[u8; mem::sizes::RAM_BANK]>,
-    pub code_banks: Vec<[u8; mem::sizes::CODE_BANK]>,
-    pub save_banks: Vec<[u8; mem::sizes::SAVE_BANK]>,
+    pub memory: [u8; sizes::TOTAL],
+    pub ram_banks: Vec<[u8; sizes::RAM_BANK]>,
+    pub code_banks: Vec<[u8; sizes::CODE_BANK]>,
+    pub save_banks: Vec<[u8; sizes::SAVE_BANK]>,
     pub save_dirty_flag: [bool; SAVE_COUNT],
-    pub atlas_banks: Vec<[u8; mem::sizes::ATLAS]>,
+    pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
 }
 
 impl VM {
     #[allow(clippy::new_without_default)] //not necessary
     pub fn new() -> Self {
         let mut registers = [0; registers::SIZE];
-        registers[registers::offset::FLAGS] = registers::flags::DEFAULT;
-        let mut memory = [0; mem::TOTAL];
+        registers[registers::offset::FLAGS] = registers::FLG_DEFAULT;
+        let mut memory = [0; sizes::TOTAL];
         //disable all sprites by default
         for i in 0..SPRITE_COUNT {
             let addr = i * sizes::SPRITE + address::SPRITE_TABLE.0 as usize;
@@ -52,7 +55,7 @@ impl VM {
 impl VM {
     pub fn step(&mut self) {
         let op_byte = self.memory[self.pc as usize];
-        let param_byte_count = ops::get_byte_count(op_byte);
+        let param_byte_count = get_byte_count(op_byte);
         if param_byte_count > 0 {
             let start = self.pc as usize + 1;
             let params = self.memory[start..=start + param_byte_count].to_owned();
@@ -98,5 +101,20 @@ impl VM {
                 self.pc
             ),
         )
+    }
+}
+
+impl VM {
+    pub fn debug_set_mem(&mut self, addr: u16, value: u8) {
+        self.write_mem(addr.into(), Byte::from(value));
+    }
+}
+
+impl VM {
+    pub fn debug_set_mem_range(&mut self, addr: u16, values: &[u8]) {
+        let addr = addr.into();
+        for value in values {
+            self.write_mem(addr, Byte::from(*value));
+        }
     }
 }
