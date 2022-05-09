@@ -1,4 +1,32 @@
-use maikor_language::registers;
+use maikor_language::registers::id;
+
+pub mod offset {
+    pub const AH: usize = 0;
+    pub const AL: usize = 1;
+    pub const BH: usize = 2;
+    pub const BL: usize = 3;
+    pub const CH: usize = 4;
+    pub const CL: usize = 5;
+    pub const DH: usize = 6;
+    pub const DL: usize = 7;
+    pub const FLAGS: usize = 8;
+
+    pub const fn from_id(id: u8) -> Option<usize> {
+        let offset = match id as usize {
+            id::AH | id::AX => AH,
+            id::BH | id::BX => BH,
+            id::CH | id::CX => CH,
+            id::DH | id::DX => DH,
+            id::AL => AL,
+            id::BL => BL,
+            id::CL => CL,
+            id::DL => DL,
+            id::FLAGS => FLAGS,
+            _ => return None,
+        };
+        Some(offset)
+    }
+}
 
 #[derive(Default, Debug, Clone, Eq, PartialEq)]
 pub struct Register {
@@ -22,19 +50,19 @@ impl Register {
     fn read_reg(byte: u8) -> (usize, usize) {
         let reg_id = (byte & 0x0F) as usize;
         return match reg_id {
-            registers::id::AL => (1, registers::offset::AL),
-            registers::id::BL => (1, registers::offset::BL),
-            registers::id::CL => (1, registers::offset::CL),
-            registers::id::DL => (1, registers::offset::DL),
-            registers::id::AH => (1, registers::offset::AH),
-            registers::id::BH => (1, registers::offset::BH),
-            registers::id::CH => (1, registers::offset::CH),
-            registers::id::DH => (1, registers::offset::DH),
-            registers::id::AX => (2, registers::offset::AX),
-            registers::id::BX => (2, registers::offset::BX),
-            registers::id::CX => (2, registers::offset::CX),
-            registers::id::DX => (2, registers::offset::DX),
-            registers::id::FLAGS => (1, registers::offset::FLAGS),
+            id::AL => (1, offset::AL),
+            id::BL => (1, offset::BL),
+            id::CL => (1, offset::CL),
+            id::DL => (1, offset::DL),
+            id::AH => (1, offset::AH),
+            id::BH => (1, offset::BH),
+            id::CH => (1, offset::CH),
+            id::DH => (1, offset::DH),
+            id::AX => (2, offset::AH),
+            id::BX => (2, offset::BH),
+            id::CX => (2, offset::CH),
+            id::DX => (2, offset::DH),
+            id::FLAGS => (1, offset::FLAGS),
             _ => panic!("invalid reg param: {byte}"),
         };
     }

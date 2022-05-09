@@ -1,5 +1,11 @@
 ## Pre-alpha
 
+### 0.1.3
+
+- Update language dep
+- Move register offsets to VM
+  - As language registers should be independent of VM implementation 
+
 ### 0.1.2
 
 - Update language dep
