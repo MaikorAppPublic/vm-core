@@ -1,5 +1,11 @@
 ## Pre-alpha
 
+### 0.1.4
+
+- *BREAKING CHANGE*
+- Fix INC/DEC to only change by 1 
+- Fix clear_flag bug
+
 ### 0.1.3
 
 - Update language dep
