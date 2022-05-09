@@ -1,8 +1,7 @@
 pub mod bitlogic;
 pub mod impls;
-pub mod shifting;
-//pub mod wrapping;
 pub mod math;
+pub mod shifting;
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Byte(pub u8);
