@@ -1,8 +1,6 @@
 use maikor_language::registers::id;
 
 pub mod offset {
-    use maikor_language::registers::id;
-
     pub const AH: usize = 0;
     pub const AL: usize = 1;
     pub const BH: usize = 2;
@@ -12,22 +10,6 @@ pub mod offset {
     pub const DH: usize = 6;
     pub const DL: usize = 7;
     pub const FLAGS: usize = 8;
-
-    pub const fn from_id(id: u8) -> Option<usize> {
-        let offset = match id as usize {
-            id::AH | id::AX => AH,
-            id::BH | id::BX => BH,
-            id::CH | id::CX => CH,
-            id::DH | id::DX => DH,
-            id::AL => AL,
-            id::BL => BL,
-            id::CL => CL,
-            id::DL => DL,
-            id::FLAGS => FLAGS,
-            _ => return None,
-        };
-        Some(offset)
-    }
 }
 
 #[derive(Default, Debug, Clone, Eq, PartialEq)]
