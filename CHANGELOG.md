@@ -5,6 +5,7 @@
 - *BREAKING CHANGE*
 - Fix INC/DEC to only change by 1 
 - Fix clear_flag bug
+- Change INC/DEC to use wrapping_math methods (only affects debug builds)
 
 ### 0.1.3
 
