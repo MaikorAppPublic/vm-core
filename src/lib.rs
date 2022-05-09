@@ -1,5 +1,6 @@
 use crate::internals::memory_access::MemoryAccess;
 use crate::mem::{address, sizes};
+use crate::register::offset;
 use crate::types::Byte;
 use maikor_language::constants::SPRITE_COUNT;
 use maikor_language::ops::get_byte_count;
@@ -30,7 +31,7 @@ impl VM {
     #[allow(clippy::new_without_default)] //not necessary
     pub fn new() -> Self {
         let mut registers = [0; registers::SIZE];
-        registers[registers::offset::FLAGS] = registers::FLG_DEFAULT;
+        registers[offset::FLAGS] = registers::FLG_DEFAULT;
         let mut memory = [0; sizes::TOTAL];
         //disable all sprites by default
         for i in 0..SPRITE_COUNT {

@@ -1,6 +1,8 @@
 use maikor_language::registers::id;
 
 pub mod offset {
+    use maikor_language::registers::id;
+
     pub const AH: usize = 0;
     pub const AL: usize = 1;
     pub const BH: usize = 2;

@@ -1,4 +1,5 @@
-use crate::registers::{flags, offset};
+use crate::register::offset;
+use crate::registers::flags;
 use crate::types::{Byte, Word};
 use crate::VM;
 use std::ops::{BitAnd, BitOr, BitXor, Not};
