@@ -26,7 +26,7 @@ impl VM {
     pub fn inc_reg_word(&mut self, reg: Register) {
         self.process_arg(&reg, false);
         let value: Word = self.read(full::INC_REG_WORD, &reg);
-        let incd: Word = (value.0 + 2).into();
+        let incd: Word = (value.0 + 1).into();
         self.write(full::INC_REG_WORD, &reg, incd);
         self.process_arg(&reg, true);
         self.set_flags(incd);
@@ -34,7 +34,7 @@ impl VM {
 
     pub fn inc_addr_word(&mut self, addr: Address) {
         let value: Word = self.read_mem(addr);
-        let incd: Word = (value.0 + 2).into();
+        let incd: Word = (value.0 + 1).into();
         self.write_mem(addr, incd);
         self.set_flags(incd);
     }
@@ -58,7 +58,7 @@ impl VM {
     pub fn dec_reg_word(&mut self, reg: Register) {
         self.process_arg(&reg, false);
         let value: Word = self.read(full::DEC_REG_WORD, &reg);
-        let incd: Word = (value.0 - 2).into();
+        let incd: Word = (value.0 - 1).into();
         self.write(full::DEC_REG_WORD, &reg, incd);
         self.process_arg(&reg, true);
         self.set_flags(incd);
@@ -66,7 +66,7 @@ impl VM {
 
     pub fn dec_addr_word(&mut self, addr: Address) {
         let value: Word = self.read_mem(addr);
-        let incd: Word = (value.0 - 2).into();
+        let incd: Word = (value.0 - 1).into();
         self.write_mem(addr, incd);
         self.set_flags(incd);
     }
