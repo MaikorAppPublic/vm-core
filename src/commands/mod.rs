@@ -23,14 +23,6 @@ use crate::VM;
 use maikor_language::registers::flags;
 use std::fmt::Debug;
 
-fn is_overflow_add(dst: bool, src: bool, result: bool) -> bool {
-    (dst == src) && (dst != result)
-}
-
-fn is_overflow_sub(dst: bool, src: bool, result: bool) -> bool {
-    (dst != src) && (dst != result)
-}
-
 impl VM {
     pub fn set_reg<T>(&mut self, name: &'static str, dst: &Register, src: T)
     where
@@ -38,7 +30,9 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
+        self.process_arg(&dst, false);
         self.write(name, dst, src);
+        self.process_arg(&dst, true);
         self.set_flags(src);
     }
 
@@ -48,12 +42,10 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
-        self.process_arg(&dst, false);
         self.process_arg(&src, false);
         let value = self.read(name, &src);
         self.set_reg(name, &dst, value);
         self.process_arg(&src, true);
-        self.process_arg(&dst, true);
     }
 
     pub fn set_reg_with_addr<T>(&mut self, name: &'static str, dst: Register, src: Address)
@@ -102,169 +94,112 @@ impl VM {
         self.write_mem(dst, self.read_mem(src));
     }
 
-    pub fn change_reg<T>(
+    pub fn change_reg<F, S>(
         &mut self,
         name: &'static str,
         dst: &Register,
-        src: T,
-        method: fn(T, T, bool) -> (T, bool),
+        src: S,
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: Flags<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: RegisterAccess<F>,
+        VM: Flags<F>,
     {
-        let dst_value: T = self.read(name, dst);
+        self.process_arg(&dst, false);
+        let dst_value: F = self.read(name, dst);
         let (result, carried) = method(dst_value, src, self.check_flag(flags::CARRY));
         self.write(name, dst, result);
-        let overflowed = is_overflow_add(
-            dst_value.is_first_bit_set(),
-            src.is_first_bit_set(),
-            result.is_first_bit_set(),
-        );
-        self.set_math_flags(result, carried, overflowed);
+        let overflowed = dst_value.is_first_bit_set() ^ result.is_first_bit_set();
+        self.process_arg(&dst, true);
+        if !dst.is_indirect || self.mem_change_affects_flags {
+            self.set_math_flags(result, carried, overflowed);
+        }
     }
 
-    pub fn reduce_reg<T>(
-        &mut self,
-        name: &'static str,
-        dst: &Register,
-        src: T,
-        method: fn(T, T, bool) -> (T, bool),
-    ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: Flags<T>,
-    {
-        let dst_value: T = self.read(name, dst);
-        let (result, carried) = method(dst_value, src, self.check_flag(flags::CARRY));
-        self.write(name, dst, result);
-        let overflowed = is_overflow_sub(
-            dst_value.is_first_bit_set(),
-            src.is_first_bit_set(),
-            result.is_first_bit_set(),
-        );
-        self.set_math_flags(result, carried, overflowed);
-    }
-
-    pub fn reduce_reg_with_reg<T>(
+    pub fn change_reg_with_reg<F, S>(
         &mut self,
         name: &'static str,
         dst: Register,
         src: Register,
-        method: fn(T, T, bool) -> (T, bool),
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: Flags<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: RegisterAccess<F>,
+        VM: Flags<F>,
+        VM: RegisterAccess<S>,
     {
-        self.process_arg(&dst, false);
         self.process_arg(&src, false);
         let value = self.read(name, &src);
         self.change_reg(name, &dst, value, method);
         self.process_arg(&src, true);
-        self.process_arg(&dst, true);
     }
 
-    pub fn reduce_reg_with_addr<T>(
+    pub fn change_reg_with_addr<F, S>(
         &mut self,
         name: &'static str,
         dst: Register,
         src: Address,
-        method: fn(T, T, bool) -> (T, bool),
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: MemoryAccess<T>,
-        VM: Flags<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: RegisterAccess<F>,
+        VM: Flags<F>,
+        VM: MemoryAccess<S>,
     {
-        self.process_arg(&dst, false);
         let value = self.read_mem(src);
         self.change_reg(name, &dst, value, method);
-        self.process_arg(&dst, true);
     }
 
-    pub fn change_reg_with_reg<T>(
-        &mut self,
-        name: &'static str,
-        dst: Register,
-        src: Register,
-        method: fn(T, T, bool) -> (T, bool),
-    ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: Flags<T>,
-    {
-        self.process_arg(&dst, false);
-        self.process_arg(&src, false);
-        let value = self.read(name, &src);
-        self.change_reg(name, &dst, value, method);
-        self.process_arg(&src, true);
-        self.process_arg(&dst, true);
-    }
-
-    pub fn change_reg_with_addr<T>(
-        &mut self,
-        name: &'static str,
-        dst: Register,
-        src: Address,
-        method: fn(T, T, bool) -> (T, bool),
-    ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: MemoryAccess<T>,
-        VM: Flags<T>,
-    {
-        self.process_arg(&dst, false);
-        let value = self.read_mem(src);
-        self.change_reg(name, &dst, value, method);
-        self.process_arg(&dst, true);
-    }
-
-    pub fn change_addr<T>(
+    pub fn change_addr<F, S>(
         &mut self,
         _name: &'static str,
         dst: Address,
-        src: T,
-        method: fn(T, T, bool) -> (T, bool),
+        src: S,
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: MemoryAccess<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: MemoryAccess<F>,
     {
-        let dst_value = self.read_mem(dst);
+        let dst_value: F = self.read_mem(dst);
         let (result, _) = method(dst_value, src, self.check_flag(flags::CARRY));
         self.write_mem(dst, result);
     }
 
-    pub fn change_addr_with_reg<T>(
+    pub fn change_addr_with_reg<F, S>(
         &mut self,
         name: &'static str,
         dst: Address,
         src: Register,
-        method: fn(T, T, bool) -> (T, bool),
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: RegisterAccess<T>,
-        VM: MemoryAccess<T>,
-        VM: Flags<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: MemoryAccess<F>,
+        VM: RegisterAccess<S>,
     {
         self.process_arg(&src, false);
-        let value = self.read(name, &src);
+        let value: S = self.read(name, &src);
         self.change_addr(name, dst, value, method);
         self.process_arg(&src, false);
     }
 
-    pub fn change_addr_with_addr<T>(
+    pub fn change_addr_with_addr<F, S>(
         &mut self,
         name: &'static str,
         dst: Address,
         src: Address,
-        method: fn(T, T, bool) -> (T, bool),
+        method: fn(F, S, bool) -> (F, bool),
     ) where
-        T: Copy + Debug + Eq + FirstBitSet,
-        VM: MemoryAccess<T>,
-        VM: Flags<T>,
+        F: Copy + Debug + Eq + FirstBitSet,
+        S: Copy + Debug + Eq + FirstBitSet,
+        VM: MemoryAccess<F>,
+        VM: MemoryAccess<S>,
     {
-        let value = self.read_mem(src);
+        let value: S = self.read_mem(src);
         self.change_addr(name, dst, value, method);
     }
 }

@@ -14,14 +14,18 @@ impl VM {
         let (incd, _) = add_byte(value, Byte::ONE, false);
         self.write(full::INC_REG_BYTE, &reg, incd);
         self.process_arg(&reg, true);
-        self.set_flags(incd);
+        if !reg.is_indirect || self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn inc_addr_byte(&mut self, addr: Address) {
         let value: Byte = self.read_mem(addr);
         let (incd, _) = add_byte(value, Byte::ONE, false);
         self.write_mem(addr, incd);
-        self.set_flags(incd);
+        if self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn inc_reg_word(&mut self, reg: Register) {
@@ -30,14 +34,18 @@ impl VM {
         let (incd, _) = add_word(value, Word::ONE, false);
         self.write(full::INC_REG_WORD, &reg, incd);
         self.process_arg(&reg, true);
-        self.set_flags(incd);
+        if !reg.is_indirect || self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn inc_addr_word(&mut self, addr: Address) {
         let value: Word = self.read_mem(addr);
         let (incd, _) = add_word(value, Word::ONE, false);
         self.write_mem(addr, incd);
-        self.set_flags(incd);
+        if self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn dec_reg_byte(&mut self, reg: Register) {
@@ -46,14 +54,18 @@ impl VM {
         let (incd, _) = sub_byte(value, Byte::ONE, false);
         self.write(full::DEC_REG_BYTE, &reg, incd);
         self.process_arg(&reg, true);
-        self.set_flags(incd);
+        if !reg.is_indirect || self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn dec_addr_byte(&mut self, addr: Address) {
         let value: Byte = self.read_mem(addr);
         let (incd, _) = sub_byte(value, Byte::ONE, false);
         self.write_mem(addr, incd);
-        self.set_flags(incd);
+        if self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn dec_reg_word(&mut self, reg: Register) {
@@ -62,13 +74,17 @@ impl VM {
         let (incd, _) = sub_word(value, Word::ONE, false);
         self.write(full::DEC_REG_WORD, &reg, incd);
         self.process_arg(&reg, true);
-        self.set_flags(incd);
+        if !reg.is_indirect || self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 
     pub fn dec_addr_word(&mut self, addr: Address) {
         let value: Word = self.read_mem(addr);
         let (incd, _) = sub_word(value, Word::ONE, false);
         self.write_mem(addr, incd);
-        self.set_flags(incd);
+        if self.mem_change_affects_flags {
+            self.set_flags(incd);
+        }
     }
 }
