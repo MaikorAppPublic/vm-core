@@ -8,13 +8,13 @@ use maikor_language::registers::id;
 #[test]
 fn add_reg_num_byte() {
     test_op(
-        &format!("ADD.B BH 10"),
+        "ADD.B BH 10",
         &[ADD_REG_NUM_BYTE, id::BH as u8, 10],
         &[(offset::BH, 10), (offset::FLAGS, INTERRUPTS)],
         &[],
     );
     test_op_init(
-        &format!("ADD.B CH 15"),
+        "ADD.B CH 15",
         &[ADD_REG_NUM_BYTE, id::CH as u8, 15],
         &[(offset::CH, 3)],
         &[],
@@ -22,7 +22,7 @@ fn add_reg_num_byte() {
         &[],
     );
     test_op_init(
-        &format!("ADD.B DH 200"),
+        "ADD.B DH 200",
         &[ADD_REG_NUM_BYTE, id::DH as u8, 200],
         &[(offset::DH, 100)],
         &[],
@@ -30,7 +30,7 @@ fn add_reg_num_byte() {
         &[],
     );
     test_op_init(
-        &format!("ADD.B (DX) 1"),
+        "ADD.B (DX) 1",
         &[ADD_REG_NUM_BYTE, id::DX as u8 | INDIRECT, 1],
         &[(offset::DH, 15), (offset::DL, 15)],
         &[(3855, 255)],
@@ -42,7 +42,7 @@ fn add_reg_num_byte() {
         &[(3855, 0)],
     );
     test_op_init(
-        &format!("ADD.B (DX)+ 200"),
+        "ADD.B (DX)+ 200",
         &[ADD_REG_NUM_BYTE, id::DX as u8 | IND_POST_INC, 200],
         &[(offset::DH, 15), (offset::DL, 10)],
         &[(3855, 255)],
@@ -58,13 +58,13 @@ fn add_reg_num_byte() {
 #[test]
 fn add_addr_num_byte() {
     test_op(
-        &format!("ADD.B $45 10"),
+        "ADD.B $45 10",
         &[ADD_ADDR_NUM_BYTE, 0, 45, 10],
         &[],
         &[(45, 10)],
     );
     test_op_init(
-        &format!("ADD.B $xF 15"),
+        "ADD.B $xF 15",
         &[ADD_ADDR_NUM_BYTE, 0, 15, 15],
         &[],
         &[(15, 3)],
@@ -76,7 +76,7 @@ fn add_addr_num_byte() {
 #[test]
 fn add_reg_reg_byte() {
     test_op_init(
-        &format!("ADD.B AH AL"),
+        "ADD.B AH AL",
         &[ADD_REG_REG_BYTE, id::AH as u8, id::AL as u8],
         &[(offset::AL, 2)],
         &[],
@@ -88,7 +88,7 @@ fn add_reg_reg_byte() {
         &[],
     );
     test_op_init(
-        &format!("ADD.B AH AL"),
+        "ADD.B AH AL",
         &[ADD_REG_REG_BYTE, id::AH as u8, id::AL as u8],
         &[(offset::AH, 1), (offset::AL, 2)],
         &[],
@@ -100,7 +100,7 @@ fn add_reg_reg_byte() {
         &[],
     );
     test_op_init(
-        &format!("ADD.B AH AL"),
+        "ADD.B AH AL",
         &[ADD_REG_REG_BYTE, id::AH as u8, id::AL as u8],
         &[(offset::AH, 160), (offset::AL, 160)],
         &[],
@@ -116,7 +116,7 @@ fn add_reg_reg_byte() {
 #[test]
 fn add_addr_reg_byte() {
     test_op_init(
-        &format!("ADD.B $45 AL"),
+        "ADD.B $45 AL",
         &[ADD_ADDR_REG_BYTE, 0, 45, id::CL as u8],
         &[(offset::CL, 2)],
         &[],
@@ -124,7 +124,7 @@ fn add_addr_reg_byte() {
         &[(45, 2)],
     );
     test_op_init(
-        &format!("ADD.B $xFF AL"),
+        "ADD.B $xFF AL",
         &[ADD_ADDR_REG_BYTE, 0, 255, id::AL as u8],
         &[(offset::AL, 2)],
         &[(255, 10)],

@@ -29,7 +29,7 @@ pub fn flags_to_str(flg: u8) -> String {
     for (id, str) in list {
         if flg & id == id {
             if !output.is_empty() {
-                output.push_str(",");
+                output.push(',');
             }
             output.push_str(str);
         }

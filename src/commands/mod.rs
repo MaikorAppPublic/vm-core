@@ -30,9 +30,9 @@ impl VM {
         VM: RegisterAccess<T>,
         VM: Flags<T>,
     {
-        self.process_arg(&dst, false);
+        self.process_arg(dst, false);
         self.write(name, dst, src);
-        self.process_arg(&dst, true);
+        self.process_arg(dst, true);
         self.set_flags(src);
     }
 
@@ -106,12 +106,12 @@ impl VM {
         VM: RegisterAccess<F>,
         VM: Flags<F>,
     {
-        self.process_arg(&dst, false);
+        self.process_arg(dst, false);
         let dst_value: F = self.read(name, dst);
         let (result, carried) = method(dst_value, src, self.check_flag(flags::CARRY));
         self.write(name, dst, result);
         let overflowed = dst_value.is_first_bit_set() ^ result.is_first_bit_set();
-        self.process_arg(&dst, true);
+        self.process_arg(dst, true);
         if !dst.is_indirect || self.mem_change_affects_flags {
             self.set_math_flags(result, carried, overflowed);
         }
