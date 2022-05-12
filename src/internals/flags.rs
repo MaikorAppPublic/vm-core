@@ -37,14 +37,14 @@ pub trait FirstBitSet {
 impl FirstBitSet for Byte {
     #[inline]
     fn is_first_bit_set(&self) -> bool {
-        self.0 & 0b1000000 == 0b1000000
+        self.0 & 0b10000000 == 0b10000000
     }
 }
 
 impl FirstBitSet for Word {
     #[inline]
     fn is_first_bit_set(&self) -> bool {
-        self.0 & 0b10000000000000 == 0b10000000000000
+        self.0 & 0b1000000000000000 == 0b1000000000000000
     }
 }
 
