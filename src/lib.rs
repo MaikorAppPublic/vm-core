@@ -25,6 +25,7 @@ pub struct VM {
     pub save_banks: Vec<[u8; sizes::SAVE_BANK]>,
     pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
+    pub mem_change_affects_flags: bool,
 }
 
 impl VM {
@@ -48,6 +49,7 @@ impl VM {
             save_banks: vec![],
             save_dirty_flag: [false; SAVE_COUNT],
             atlas_banks: vec![],
+            mem_change_affects_flags: false,
         }
     }
 }

@@ -12,4 +12,4 @@ keywords = ["game","gamedev","2d","vm"]
 categories = ["games"]
 
 [dependencies]
-maikor-language = "0.1.8"
+maikor-language = "0.1.11"

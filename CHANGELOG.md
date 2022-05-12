@@ -1,5 +1,17 @@
 ## Pre-alpha
 
+### 0.1.5
+
+- *BREAKING CHANGE*
+- Update dependencies
+  - Language to 0.1.11
+- Fix MUL
+- Fix bugs with flags
+  - Signed flag is now correctly set
+  - Flags are no longer set when results are written to memory
+    - This is controlled by `mem_change_affects_flags` in the `VM`
+- Fix CMPS.B (R,R)
+
 ### 0.1.4
 
 - *BREAKING CHANGE*

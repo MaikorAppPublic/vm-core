@@ -94,8 +94,8 @@ pub fn sub_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 
 // MUL
 
-pub fn mul_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
-    math_num(this, other, u8::overflowing_mul)
+pub fn mul_byte(this: Word, other: Byte, _carry: bool) -> (Word, bool) {
+    math_num(this, Word(other.0 as u16), u16::overflowing_mul)
 }
 
 pub fn mul_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
@@ -114,8 +114,8 @@ pub fn div_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
 
 // MULS
 
-pub fn muls_byte(this: Byte, other: Byte, _carry: bool) -> (Byte, bool) {
-    math_num(this, other, i8::overflowing_mul)
+pub fn muls_byte(this: Word, other: Byte, _carry: bool) -> (Word, bool) {
+    math_num(this, Word(other.0 as u16), i16::overflowing_mul)
 }
 
 pub fn muls_word(this: Word, other: Word, _carry: bool) -> (Word, bool) {
