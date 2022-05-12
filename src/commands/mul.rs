@@ -6,7 +6,7 @@ use maikor_language::names::full;
 
 impl VM {
     pub fn mul_reg_num_byte(&mut self, dst: Register, src: Byte) {
-        self.change_reg(full::MUL_REG_NUM_BYTE, &dst, src, mul_byte);
+        self.change_reg(full::MUL_REG_NUM_WORD, &dst, src, mul_byte);
     }
 
     pub fn mul_reg_num_word(&mut self, dst: Register, src: Word) {
