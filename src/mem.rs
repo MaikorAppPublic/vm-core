@@ -30,12 +30,7 @@ pub mod sizes {
     pub const STACK: usize = sizes::STACK as usize;
     pub const SP: usize = sizes::SP as usize;
     pub const FP: usize = sizes::FP as usize;
-    pub const ATLAS_TOTAL: usize = ATLAS + ATLAS + ATLAS1_BANK_ID + ATLAS2_BANK_ID;
-    pub const LAYER_TOTAL: usize = LAYERS_CONTENT + LAYERS_HEADER;
-    pub const GRAPHICS_TOTAL: usize = LAYER_TOTAL + SPRITE_TABLE + PALETTES_TOTAL + ATLAS_TOTAL;
-    pub const SYSTEM_TOTAL: usize = CODE + RAM + CODE_BANK_ID + RAM_BANK_ID + STACK + SP + FP;
-    pub const HARDWARE_TOTAL: usize = SOUND + INPUT + SAVE_BANK_ID + SAVE_BANK;
-    pub const TOTAL: usize = GRAPHICS_TOTAL + SYSTEM_TOTAL + HARDWARE_TOTAL;
+    pub const TOTAL: usize = sizes::TOTAL as usize;
 }
 
 pub mod address {
@@ -62,5 +57,6 @@ pub mod address {
     pub const ATLAS2_BANK_ID: Address = Address(address::ATLAS2_BANK_ID);
     pub const SP: Address = Address(address::SP);
     pub const FP: Address = Address(address::FP);
+    pub const RESERVED: Address = Address(address::RESERVED);
     pub const STACK: Address = Address(address::STACK);
 }
