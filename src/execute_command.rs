@@ -158,7 +158,7 @@ impl VM {
             ops::CMP_REG_NUM_WORD => self.cmp_reg_num_word(params.register(), params.word()),
             ops::CMP_REG_ADDR_BYTE => self.cmp_reg_num_byte(params.register(), params.byte()),
             ops::CMP_REG_ADDR_WORD => self.cmp_reg_num_word(params.register(), params.word()),
-            ops::CMPS_REG_REG_BYTE => self.cmp_reg_reg_byte(params.register(), params.register()),
+            ops::CMPS_REG_REG_BYTE => self.cmps_reg_reg_byte(params.register(), params.register()),
             ops::CMPS_REG_REG_WORD => self.cmps_reg_reg_word(params.register(), params.register()),
             ops::CMPS_REG_NUM_BYTE => self.cmps_reg_num_byte(params.register(), params.byte()),
             ops::CMPS_REG_NUM_WORD => self.cmps_reg_num_word(params.register(), params.word()),
