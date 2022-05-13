@@ -1,10 +1,10 @@
-# Maikor
+<img alt="Maikor" src="https://github.com/MaikorAppPublic/.github/raw/main/profile/controller_with_logo_blue.png?raw=true" width="200">
 
 >⚠️ Work in progress
 >
 > Links may be broken, features missing, etc
 
-*Cross platform 16 bit game system*
+*Cross-platform 16-bit game system*
 
 See more at [maikor.app](https://maikor.app) and the [project homepage](https://github.com/MaikorAppPublic)
 
