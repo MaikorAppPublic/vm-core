@@ -1,5 +1,17 @@
 ## Pre-alpha
 
+### 0.1.6
+
+- Add `halted` and `error` to VM
+- Add `executed_ops` to VM
+- Improve invalid register error handing
+- Fix NOP bug
+- Add more tests
+- Add EHALT
+- Update dependencies
+  - Language to 0.1.12
+- Fix jump bugs  
+
 ### 0.1.5
 
 - *BREAKING CHANGE*

@@ -5,9 +5,7 @@ use crate::VM;
 use maikor_language::names::full;
 
 impl VM {
-    pub fn nop(&mut self) {
-        self.pc = self.pc.wrapping_add(1);
-    }
+    pub fn nop(&mut self) {}
 
     pub fn swap_reg_reg_byte(&mut self, dst: Register, src: Register) {
         self.process_arg(&dst, false);

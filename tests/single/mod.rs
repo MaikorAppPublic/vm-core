@@ -6,6 +6,7 @@ mod inc;
 mod mcpy;
 mod mul;
 mod sub;
+mod swap;
 
 //execute op on a new vm, and compare registers and memory afterwards
 fn test_op(desc: &str, bytes: &[u8], registers: &[(usize, u8)], memory: &[(usize, u8)]) {

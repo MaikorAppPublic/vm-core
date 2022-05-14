@@ -23,17 +23,17 @@ pub struct Register {
 }
 
 impl Register {
-    pub fn from(byte: u8) -> Register {
-        let (size, start) = Register::read_reg(byte);
-        let mut reg = Register::read_meta(byte);
+    pub fn from(byte: u8) -> Result<Register, String> {
+        let (size, start) = Register::read_reg(byte)?;
+        let mut reg = Register::read_meta(byte)?;
         reg.addr = start;
         reg.size = size;
-        reg
+        Ok(reg)
     }
 
-    fn read_reg(byte: u8) -> (usize, usize) {
+    fn read_reg(byte: u8) -> Result<(usize, usize), String> {
         let reg_id = (byte & 0x0F) as usize;
-        return match reg_id {
+        let result = match reg_id {
             id::AL => (1, offset::AL),
             id::BL => (1, offset::BL),
             id::CL => (1, offset::CL),
@@ -47,13 +47,14 @@ impl Register {
             id::CX => (2, offset::CH),
             id::DX => (2, offset::DH),
             id::FLAGS => (1, offset::FLAGS),
-            _ => panic!("invalid reg param: {byte}"),
+            _ => return Err(format!("invalid reg param: {byte}")),
         };
+        Ok(result)
     }
 
-    fn read_meta(byte: u8) -> Register {
+    fn read_meta(byte: u8) -> Result<Register, String> {
         use maikor_language::op_params::*;
-        return match byte & 0xF0 {
+        let reg = match byte & 0xF0 {
             REGISTER => Register {
                 ..Register::default()
             },
@@ -105,7 +106,8 @@ impl Register {
                 is_indirect: true,
                 ..Register::default()
             },
-            _ => panic!("impossible: {} -> {}", byte, byte & 0xF0),
+            _ => return Err(format!("invalid reg meta: {} -> {}", byte, byte & 0xF0)),
         };
+        Ok(reg)
     }
 }

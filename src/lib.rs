@@ -26,6 +26,9 @@ pub struct VM {
     pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
     pub mem_change_affects_flags: bool,
+    pub error: Option<String>,
+    pub halted: bool,
+    pub op_executed: u128,
 }
 
 impl VM {
@@ -50,6 +53,9 @@ impl VM {
             save_dirty_flag: [false; SAVE_COUNT],
             atlas_banks: vec![],
             mem_change_affects_flags: false,
+            error: None,
+            halted: false,
+            op_executed: 0,
         }
     }
 }
@@ -57,32 +63,46 @@ impl VM {
 /// Public interface to VM
 impl VM {
     pub fn step(&mut self) {
+        if self.halted {
+            return;
+        }
         let op_byte = self.memory[self.pc as usize];
         let param_byte_count = get_byte_count(op_byte);
-        if param_byte_count > 0 {
+        let result = if param_byte_count > 0 {
             let start = self.pc as usize + 1;
-            let params = self.memory[start..=start + param_byte_count].to_owned();
-            self.execute(op_byte, VecDeque::from(params));
+            let params = self.memory[start..start + param_byte_count].to_owned();
+            self.execute(op_byte, VecDeque::from(params))
         } else {
-            self.execute(op_byte, VecDeque::new());
+            self.execute(op_byte, VecDeque::new())
+        };
+        match result {
+            Ok(jumped) => {
+                if !jumped {
+                    self.pc = self.pc.wrapping_add((1 + param_byte_count) as u16);
+                }
+            }
+            Err(msg) => self.fail(msg),
         }
-        self.pc = self.pc.wrapping_add((1 + param_byte_count) as u16);
     }
 
-    //Run arbitrary bits, does not advance PC
+    //Run arbitrary op, does not advance PC automatically (JMP, etc ops still work)
     pub fn execute_op(&mut self, bytes: &[u8]) {
         if bytes.is_empty() {
             panic!("Must have at least one byte");
         }
-        if bytes.len() == 1 {
-            self.execute(bytes[0], VecDeque::new());
+        let result = if bytes.len() == 1 {
+            self.execute(bytes[0], VecDeque::new())
         } else {
-            self.execute(bytes[0], VecDeque::from(bytes[1..].to_owned()));
+            self.execute(bytes[0], VecDeque::from(bytes[1..].to_owned()))
+        };
+        if result.is_err() {
+            self.fail(result.err().unwrap());
         }
     }
 
     pub fn fail(&mut self, error_message: String) {
-        panic!("{}\n{}", error_message, self.dump())
+        self.error = Some(format!("{}\n{}", error_message, self.dump()));
+        self.halted = true;
     }
 
     pub fn dump(&self) -> String {

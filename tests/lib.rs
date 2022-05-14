@@ -1,4 +1,7 @@
+extern crate core;
+
 use maikor_language::registers::flags::*;
+use maikor_language::registers::id;
 
 mod multiple;
 mod single;
@@ -47,7 +50,8 @@ pub fn compare_registers(text: &str, lhs: &[u8; 9], rhs: &[u8; 9]) {
         let expected = rhs[i];
         if expected != actual {
             if i < 8 {
-                mismatches.push_str(&format!("{}: {} != {}\n", i, expected, actual));
+                let name = id::to_name(offset_to_id(i) as u8).unwrap();
+                mismatches.push_str(&format!("{}: {} != {}\n", name, expected, actual));
             } else {
                 mismatches.push_str(&format!(
                     "FLG: '{}' != '{}'",
@@ -59,6 +63,21 @@ pub fn compare_registers(text: &str, lhs: &[u8; 9], rhs: &[u8; 9]) {
     }
     if !mismatches.is_empty() {
         panic!("Register comparison failed for {}:\n{}", text, mismatches)
+    }
+}
+
+fn offset_to_id(offset_byte: usize) -> usize {
+    match offset_byte {
+        offset::AH => id::AH,
+        offset::AL => id::AL,
+        offset::BH => id::BH,
+        offset::BL => id::BL,
+        offset::CH => id::CH,
+        offset::CL => id::CL,
+        offset::DH => id::DH,
+        offset::DL => id::DL,
+        offset::FLAGS => id::FLAGS,
+        _ => panic!("impossible: {offset_byte}"),
     }
 }
 
