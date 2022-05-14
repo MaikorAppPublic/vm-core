@@ -3,13 +3,12 @@ use crate::types::{Address, Byte, Word};
 use crate::VM;
 use maikor_language::ops;
 use maikor_language::ops::{MAY_JMP_OPS, MUST_JMP_OPS};
-use std::collections::VecDeque;
 
 #[rustfmt::skip]
 impl VM {
     /// Execute op with params
     /// Returns true if op has adjusted PC (and so VM shouldn't automatically advance)
-    pub fn execute(&mut self, op: u8, mut params: VecDeque<u8>) -> Result<bool, String> {
+    pub fn execute(&mut self, op: u8, mut params: ArgParams) -> Result<bool, String> {
         self.op_executed += 1;
         if MUST_JMP_OPS.contains(&op) {
             return self.execute_must_jmp_op(op, params);
@@ -227,7 +226,7 @@ impl VM {
         Ok(false)
     }
     
-    fn execute_must_jmp_op(&mut self, op: u8, mut params: VecDeque<u8>) -> Result<bool, String> {
+    fn execute_must_jmp_op(&mut self, op: u8, mut params: ArgParams) -> Result<bool, String> {
         match op {
             // ops::RET => {},
             // ops::RETI => {},
@@ -242,7 +241,7 @@ impl VM {
         Ok(true)
     }
     
-    fn execute_may_jmp_op(&mut self, op: u8, mut params: VecDeque<u8>) -> Result<bool, String> {
+    fn execute_may_jmp_op(&mut self, op: u8, mut params: ArgParams) -> Result<bool, String> {
         let jumped = match op {
             ops::JE_REG => self.je_reg(params.register()?),
             ops::JE_ADDR => self.je_addr(params.address()),
@@ -268,6 +267,55 @@ impl VM {
         };
         Ok(jumped)
     }
+    
+    // fn next_byte(&mut self) -> u8 {
+    //     let byte = self.memory[self.arg_ptr];
+    //     self.arg_ptr += 1;
+    //     byte
+    // }
+    // 
+    // fn byte(&mut self) -> Byte {
+    //     Byte(self.next_byte())
+    // }
+    // 
+    // fn word(&mut self) -> Word {
+    //     Word(u16::from_be_bytes([self.next_byte(), self.next_byte()]))
+    // }
+    // 
+    // fn register(&mut self) -> Result<Register, String> {
+    //     Register::from(self.next_byte())
+    // }
+    // 
+    // fn address(&mut self) -> Address {
+    //     Address(u16::from_be_bytes([self.next_byte(), self.next_byte()]))
+    // }
+}
+
+#[derive(Debug)]
+pub struct ArgParams {
+    bytes: [u8; 6],
+    len: usize,
+    ptr: usize,
+}
+
+impl ArgParams {
+    pub fn new(bytes: &[u8], start: usize, count: usize) -> Self {
+        let mut params = Self {
+            bytes: [0; 6],
+            len: count,
+            ptr: 0,
+        };
+        for i in 0..count {
+            params.bytes[i] = bytes[start + i];
+        }
+        params
+    }
+
+    pub fn next_byte(&mut self) -> u8 {
+        let byte = self.bytes[self.ptr];
+        self.ptr += 1;
+        byte
+    }
 }
 
 trait ReadParams {
@@ -277,26 +325,20 @@ trait ReadParams {
     fn address(&mut self) -> Address;
 }
 
-impl ReadParams for VecDeque<u8> {
+impl ReadParams for ArgParams {
     fn byte(&mut self) -> Byte {
-        Byte(self.pop_front().unwrap())
+        Byte(self.next_byte())
     }
 
     fn word(&mut self) -> Word {
-        Word(u16::from_be_bytes([
-            self.pop_front().unwrap(),
-            self.pop_front().unwrap(),
-        ]))
+        Word(u16::from_be_bytes([self.next_byte(), self.next_byte()]))
     }
 
     fn register(&mut self) -> Result<Register, String> {
-        Register::from(self.pop_front().unwrap())
+        Register::from(self.next_byte())
     }
 
     fn address(&mut self) -> Address {
-        Address(u16::from_be_bytes([
-            self.pop_front().unwrap(),
-            self.pop_front().unwrap(),
-        ]))
+        Address(u16::from_be_bytes([self.next_byte(), self.next_byte()]))
     }
 }

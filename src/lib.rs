@@ -1,3 +1,4 @@
+use crate::execute_command::ArgParams;
 use crate::internals::memory_access::MemoryAccess;
 use crate::mem::{address, sizes};
 use crate::register::offset;
@@ -5,7 +6,6 @@ use crate::types::Byte;
 use maikor_language::constants::SPRITE_COUNT;
 use maikor_language::ops::get_byte_count;
 use maikor_language::{registers, SAVE_COUNT};
-use std::collections::VecDeque;
 
 mod commands;
 mod execute_command;
@@ -29,6 +29,7 @@ pub struct VM {
     pub error: Option<String>,
     pub halted: bool,
     pub op_executed: u128,
+    pub arg_ptr: usize,
 }
 
 impl VM {
@@ -56,6 +57,7 @@ impl VM {
             error: None,
             halted: false,
             op_executed: 0,
+            arg_ptr: 0,
         }
     }
 }
@@ -68,13 +70,8 @@ impl VM {
         }
         let op_byte = self.memory[self.pc as usize];
         let param_byte_count = get_byte_count(op_byte);
-        let result = if param_byte_count > 0 {
-            let start = self.pc as usize + 1;
-            let params = self.memory[start..start + param_byte_count].to_owned();
-            self.execute(op_byte, VecDeque::from(params))
-        } else {
-            self.execute(op_byte, VecDeque::new())
-        };
+        let arg_params = ArgParams::new(&self.memory, self.pc as usize + 1, param_byte_count);
+        let result = self.execute(op_byte, arg_params);
         match result {
             Ok(jumped) => {
                 if !jumped {
@@ -90,11 +87,9 @@ impl VM {
         if bytes.is_empty() {
             panic!("Must have at least one byte");
         }
-        let result = if bytes.len() == 1 {
-            self.execute(bytes[0], VecDeque::new())
-        } else {
-            self.execute(bytes[0], VecDeque::from(bytes[1..].to_owned()))
-        };
+        let param_byte_count = get_byte_count(bytes[0]);
+        let arg_params = ArgParams::new(&bytes, 1, param_byte_count);
+        let result = self.execute(bytes[0], arg_params);
         if result.is_err() {
             self.fail(result.err().unwrap());
         }
