@@ -70,8 +70,9 @@ impl VM {
         }
         let op_byte = self.memory[self.pc as usize];
         let param_byte_count = get_byte_count(op_byte);
-        let arg_params = ArgParams::new(&self.memory, self.pc as usize + 1, param_byte_count);
-        let result = self.execute(op_byte, arg_params);
+        self.arg_ptr = (self.pc + 1) as usize;
+        // let arg_params = ArgParams::new(&self.memory, self.pc as usize + 1, param_byte_count);
+        let result = self.execute(op_byte);
         match result {
             Ok(jumped) => {
                 if !jumped {
@@ -87,12 +88,12 @@ impl VM {
         if bytes.is_empty() {
             panic!("Must have at least one byte");
         }
-        let param_byte_count = get_byte_count(bytes[0]);
-        let arg_params = ArgParams::new(&bytes, 1, param_byte_count);
-        let result = self.execute(bytes[0], arg_params);
-        if result.is_err() {
-            self.fail(result.err().unwrap());
-        }
+        // let param_byte_count = get_byte_count(bytes[0]);
+        // let arg_params = ArgParams::new(&bytes, 1, param_byte_count);
+        // let result = self.execute(bytes[0], arg_params);
+        // if result.is_err() {
+        //     self.fail(result.err().unwrap());
+        // }
     }
 
     pub fn fail(&mut self, error_message: String) {

@@ -34,7 +34,12 @@ impl DirectRegisterAccess<Byte> for VM {
 
 impl DirectRegisterAccess<Word> for VM {
     fn read_register(&self, addr: usize) -> Word {
-        u16::from_be_bytes([self.registers[addr], self.registers[addr + 1]]).into()
+        let mut value = 0;
+        value = self.registers[addr] as u16;
+        value <<= 8;
+        value += self.registers[addr + 1] as u16;
+        Word(value)
+        // u16::from_be_bytes([self.registers[addr], self.registers[addr + 1]]).into()
     }
 
     fn write_register(&mut self, addr: usize, value: Word) {
