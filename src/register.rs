@@ -31,6 +31,24 @@ impl Register {
         Ok(reg)
     }
 
+    pub fn id(&self) -> usize {
+        match (self.addr, self.size) {
+            (offset::AH, 2) => id::AX,
+            (offset::AL, 1) => id::AL,
+            (offset::AH, 1) => id::AH,
+            (offset::BH, 2) => id::BX,
+            (offset::BL, 1) => id::BL,
+            (offset::BH, 1) => id::BH,
+            (offset::CH, 2) => id::CX,
+            (offset::CL, 1) => id::CL,
+            (offset::CH, 1) => id::CH,
+            (offset::DH, 2) => id::DX,
+            (offset::DL, 1) => id::DL,
+            (offset::DH, 1) => id::DH,
+            _ => id::FLAGS,
+        }
+    }
+
     fn read_reg(byte: u8) -> Result<(usize, usize), String> {
         let reg_id = (byte & 0x0F) as usize;
         let result = match reg_id {
@@ -109,5 +127,47 @@ impl Register {
             _ => return Err(format!("invalid reg meta: {} -> {}", byte, byte & 0xF0)),
         };
         Ok(reg)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn check_reg_from() {
+        assert_eq!(
+            Register::from(id::AL as u8).unwrap(),
+            Register {
+                is_indirect: false,
+                is_calc: false,
+                is_post: false,
+                is_inc: false,
+                size: 1,
+                addr: 1
+            }
+        );
+        assert_eq!(
+            Register::from(id::AH as u8).unwrap(),
+            Register {
+                is_indirect: false,
+                is_calc: false,
+                is_post: false,
+                is_inc: false,
+                size: 1,
+                addr: 0
+            }
+        );
+        assert_eq!(
+            Register::from(id::AX as u8).unwrap(),
+            Register {
+                is_indirect: false,
+                is_calc: false,
+                is_post: false,
+                is_inc: false,
+                size: 2,
+                addr: 0
+            }
+        );
     }
 }
