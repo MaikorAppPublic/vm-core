@@ -44,6 +44,11 @@ impl VM {
             memory[addr + 2] = 255;
             memory[addr + 3] = 128;
         }
+        let stack = (address::STACK as u16).to_be_bytes();
+        memory[address::SP] = stack[0];
+        memory[address::SP + 1] = stack[1];
+        memory[address::FP] = stack[0];
+        memory[address::FP + 1] = stack[1];
         Self {
             registers,
             pc: 0,
