@@ -142,6 +142,23 @@ impl VM {
                 self.get_fp(),
                 self.pc
             ),
+            format_args!(
+                "Stack: {}",
+                self.memory[address::STACK..address::STACK + self.get_sp() as usize]
+                    .iter()
+                    .map(|num| format!("{:02X}", num))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
+            format_args!("Code: {}", {
+                let start = self.pc.saturating_sub(6) as usize;
+                let end = self.pc.saturating_add(7) as usize;
+                self.memory[start..end]
+                    .iter()
+                    .map(|num| format!("{:02X}", num))
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            })
         )
     }
 }
