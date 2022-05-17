@@ -15,6 +15,9 @@ mod register;
 mod types;
 
 pub struct VM {
+    /// Order is AH, AL, BH, BL, CH, CL, DH, DL, FLG
+    /// Extended registers (AX, BX, etc) are made of H+L, i.e.
+    /// AX is \[AH,AL]
     pub registers: [u8; registers::SIZE],
     pub pc: u16,
     //All changes MUST go through debug_set_mem or debug_set_mem_range
@@ -23,13 +26,21 @@ pub struct VM {
     pub ram_banks: Vec<[u8; sizes::RAM_BANK]>,
     pub code_banks: Vec<[u8; sizes::CODE_BANK]>,
     pub save_banks: Vec<[u8; sizes::SAVE_BANK]>,
+    /// if a flag is true, then the matching data in save_banks should be written to disk
+    /// and the flag set to false (also, if `memory[SAVE_CONTROL]` & `AUTO_SAVE` is 0, then
+    /// `memory[SAVE_CONTROL]` should set to 0)
     pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
     pub mem_change_affects_flags: bool,
     pub error: Option<String>,
+    /// if true the VM has stopped (EoF or error) and can't continue
     pub halted: bool,
-    pub op_executed: u128,
-    pub arg_ptr: usize,
+    /// Count of operations executed this session
+    pub op_executed: usize,
+    /// Count of cycles executed this session
+    pub cycles_executed: usize,
+    /// index in memory where arguments are being read from
+    arg_ptr: usize,
 }
 
 impl VM {
@@ -69,7 +80,12 @@ impl VM {
 
 /// Public interface to VM
 impl VM {
-    pub fn step(&mut self) {
+    /// Advance VM one operation
+    ///
+    /// If this fails (invalid register, etc) then [VM::halted] will be set to true
+    ///
+    /// returns number of cycles used  
+    pub fn step(&mut self) -> usize {
         if self.halted {
             return;
         }
@@ -88,7 +104,8 @@ impl VM {
         }
     }
 
-    //Run arbitrary op, does not advance PC automatically (JMP, etc ops still work)
+    /// Run arbitrary op, does not advance PC automatically (JMP, etc ops still work)
+    /// This works by writing the bytes to a section of reserved and setting the PC to there
     pub fn execute_op(&mut self, bytes: &[u8]) {
         if bytes.is_empty() {
             panic!("Must have at least one byte");
@@ -106,6 +123,7 @@ impl VM {
         self.halted = true;
     }
 
+    /// Writes registers to String
     pub fn dump(&self) -> String {
         format!(
             "{}\n{}\n{}",
@@ -129,12 +147,15 @@ impl VM {
 }
 
 impl VM {
+    /// Set one byte in memory
+    /// This will trigger interrupts, bank switching, etc
     pub fn debug_set_mem(&mut self, addr: u16, value: u8) {
         self.write_mem(addr.into(), Byte::from(value));
     }
 }
 
-impl VM {
+    /// Set bytes in memory
+    /// This will trigger interrupts, bank switching, etc
     pub fn debug_set_mem_range(&mut self, addr: u16, values: &[u8]) {
         let addr = addr.into();
         for value in values {
