@@ -1,5 +1,9 @@
 ## Pre-alpha
 
+### 0.1.7
+- Fix `debug_set_mem_range`
+- Change sprite table to start as all 0s
+
 ### 0.1.6
 
 - *BREAKING CHANGE*

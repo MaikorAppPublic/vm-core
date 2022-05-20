@@ -42,12 +42,6 @@ impl VM {
         let mut registers = [0; registers::SIZE];
         registers[offset::FLAGS] = registers::FLG_DEFAULT;
         let mut memory = [0; sizes::TOTAL];
-        //disable all sprites by default
-        for i in 0..SPRITE_COUNT {
-            let addr = i * sizes::SPRITE + address::SPRITE_TABLE;
-            memory[addr + 2] = 255;
-            memory[addr + 3] = 128;
-        }
         let stack = (address::STACK as u16).to_be_bytes();
         memory[address::SP] = stack[0];
         memory[address::SP + 1] = stack[1];
@@ -209,8 +203,8 @@ impl VM {
     /// This will trigger interrupts, bank switching, etc
     pub fn debug_set_mem_range(&mut self, addr: u16, values: &[u8]) {
         let addr = addr;
-        for value in values {
-            self.write_byte_mem(addr, *value);
+        for (i, value) in values.iter().enumerate() {
+            self.write_byte_mem(addr + i as u16, *value);
         }
     }
 }
