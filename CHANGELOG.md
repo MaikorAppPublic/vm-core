@@ -1,23 +1,49 @@
 ## Pre-alpha
 
+### 0.1.6
+
+- *BREAKING CHANGE*
+- Change how registers and memory are accessed internally
+- Add `halted` and `error` to VM
+- Add `executed_ops` and `executed_cycles` to VM
+- Add `init()` to VM
+- Improve invalid register error handing
+- Fix `NOP` bug
+- Add more tests
+- Add `EHALT`, `JMP`
+- Update dependencies
+  - Language to 0.1.19
+- Fix jump bugs  
+- Saves dirty flags are affected by `SAVE_CONTROL`
+
+**Register/Memory/Type changes**
+
+Originally the three main value types the VM used (bytes, words and addresses) were types and most methods have generic implementations for those types, however this was causing a massive performance hit.
+
+On an M1 Mac with 0.1.5 code, a benchmark program (~750k ops / 1.5m cycles) took ~77ms to run, now with the changes below it takes ~8ms. (Debug times went from 700ms to 33ms).
+
+Main changes:
+ - Remove all uses of VecDeque
+ - Remove all generic methods
+
+Unfortunately adding support for index addressing increases the average time for the benchmark to ~9ms.
+
 ### 0.1.5
 
 - *BREAKING CHANGE*
 - Update dependencies
   - Language to 0.1.11
-- Fix MUL
+- Fix `MUL`
 - Fix bugs with flags
   - Signed flag is now correctly set
-  - Flags are no longer set when results are written to memory
-    - This is controlled by `mem_change_affects_flags` in the `VM`
-- Fix CMPS.B (R,R)
+- Fix `CMPS.B (R,R)`
 
 ### 0.1.4
 
 - *BREAKING CHANGE*
-- Fix INC/DEC to only change by 1 
+- Fix `INC/DEC` to only change by 1 
 - Fix clear_flag bug
-- Change INC/DEC to use wrapping_math methods (only affects debug builds)
+- Change `INC/DEC` to use wrapping_math methods (only affects debug builds)
 
 ### 0.1.3
 

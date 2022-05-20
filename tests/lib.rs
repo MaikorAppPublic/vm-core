@@ -1,9 +1,13 @@
-use maikor_language::registers::flags::*;
+extern crate core;
+
+use maikor_platform::mem::{address, sizes};
+use maikor_platform::registers::flags::*;
+use maikor_platform::registers::id;
 
 mod multiple;
 mod single;
 
-pub mod offset {
+mod offset {
     pub const AH: usize = 0;
     pub const AL: usize = 1;
     pub const BH: usize = 2;
@@ -41,18 +45,19 @@ pub fn flags_to_str(flg: u8) -> String {
     }
 }
 
-pub fn compare_registers(text: &str, lhs: &[u8; 9], rhs: &[u8; 9]) {
+pub fn compare_registers(text: &str, expected_values: &[u8; 9], actual_values: &[u8; 9]) {
     let mut mismatches = String::new();
-    for (i, &actual) in lhs.iter().enumerate() {
-        let expected = rhs[i];
+    for (i, &actual) in actual_values.iter().enumerate() {
+        let expected = expected_values[i];
         if expected != actual {
             if i < 8 {
-                mismatches.push_str(&format!("{}: {} != {}\n", i, expected, actual));
+                let name = id::to_name(offset_to_id(i) as u8).unwrap();
+                mismatches.push_str(&format!("{} was {} not {}\n", name, actual, expected));
             } else {
                 mismatches.push_str(&format!(
-                    "FLG: '{}' != '{}'",
-                    flags_to_str(expected),
-                    flags_to_str(actual)
+                    "FLG: was '{}' not '{}'",
+                    flags_to_str(actual),
+                    flags_to_str(expected)
                 ));
             }
         }
@@ -62,21 +67,42 @@ pub fn compare_registers(text: &str, lhs: &[u8; 9], rhs: &[u8; 9]) {
     }
 }
 
-pub fn compare_memory(text: &str, lhs: &[u8], rhs: &[u8]) {
-    if lhs.len() != rhs.len() {
+fn offset_to_id(offset_byte: usize) -> usize {
+    match offset_byte {
+        offset::AH => id::AH,
+        offset::AL => id::AL,
+        offset::BH => id::BH,
+        offset::BL => id::BL,
+        offset::CH => id::CH,
+        offset::CL => id::CL,
+        offset::DH => id::DH,
+        offset::DL => id::DL,
+        offset::FLAGS => id::FLAGS,
+        _ => panic!("impossible: {offset_byte}"),
+    }
+}
+
+///Used to compare VM memory to expected results
+///Ignores reserved area but include IRQ_RET_ADDR and IRQ_REG_DUMP
+pub fn compare_memory(text: &str, expected_mem: &[u8], actual_mem: &[u8]) {
+    if expected_mem.len() != actual_mem.len() {
         panic!(
             "Memory comparison failed, different sizes: {} != {}",
-            lhs.len(),
-            rhs.len()
+            expected_mem.len(),
+            actual_mem.len()
         );
     }
     let mut mismatches = String::new();
-    for (i, &actual) in lhs.iter().enumerate() {
-        let expected = rhs[i];
+    for (i, &actual) in actual_mem.iter().enumerate() {
+        let addr = i as u16;
+        if (address::RESERVED..address::RESERVED + sizes::RESERVED).contains(&addr) {
+            continue;
+        }
+        let expected = expected_mem[i];
         if expected != actual {
             mismatches.push_str(&format!(
-                "{:04X}: {:02X} != {:02X} | {}: {} != {}\n",
-                i, expected, actual, i, expected, actual
+                "{:04X} was {:02X} not {:02X} | {} was {} not {}\n",
+                i, actual, expected, i, actual, expected
             ));
         }
     }
