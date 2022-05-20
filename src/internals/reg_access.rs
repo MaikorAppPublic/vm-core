@@ -109,12 +109,8 @@ mod test {
     fn byte_reg_write() {
         let mut vm = VM::new();
 
-        let cost1 = vm
-            .write_byte_reg(&Register::from(id::AL as u8).unwrap(), 0, 10)
-            .unwrap();
-        let cost2 = vm
-            .write_byte_reg(&Register::from(id::DH as u8).unwrap(), 0, 19)
-            .unwrap();
+        let cost1 = vm.write_byte_reg(&Register::from(id::AL as u8), 0, 10);
+        let cost2 = vm.write_byte_reg(&Register::from(id::DH as u8), 0, 19);
 
         assert_eq!(vm.registers, [0, 10, 0, 0, 0, 0, 19, 0, FLG_DEFAULT]);
         assert_eq!(cost1, 1);
@@ -127,12 +123,8 @@ mod test {
 
         vm.registers[offset::AH] = 1;
         vm.registers[offset::DL] = 50;
-        let cost1 = vm
-            .write_byte_reg(&Register::from(id::AX as u8 | INDIRECT).unwrap(), 0, 10)
-            .unwrap();
-        let cost2 = vm
-            .write_byte_reg(&Register::from(id::DX as u8 | INDIRECT).unwrap(), 0, 19)
-            .unwrap();
+        let cost1 = vm.write_byte_reg(&Register::from(id::AX as u8 | INDIRECT), 0, 10);
+        let cost2 = vm.write_byte_reg(&Register::from(id::DX as u8 | INDIRECT), 0, 19);
 
         assert_eq!(vm.memory[256], 10);
         assert_eq!(vm.memory[50], 19);
@@ -144,12 +136,8 @@ mod test {
     fn word_reg_write() {
         let mut vm = VM::new();
 
-        let cost1 = vm
-            .write_word_reg(&Register::from(id::BX as u8).unwrap(), 0, 256)
-            .unwrap();
-        let cost2 = vm
-            .write_word_reg(&Register::from(id::DX as u8).unwrap(), 0, 12563)
-            .unwrap();
+        let cost1 = vm.write_word_reg(&Register::from(id::BX as u8), 0, 256);
+        let cost2 = vm.write_word_reg(&Register::from(id::DX as u8), 0, 12563);
 
         assert_eq!(vm.registers, [0, 0, 1, 0, 0, 0, 49, 19, FLG_DEFAULT]);
         assert_eq!(cost1, 2);
@@ -162,12 +150,8 @@ mod test {
 
         vm.registers[offset::AH] = 1;
         vm.registers[offset::DL] = 50;
-        let cost1 = vm
-            .write_word_reg(&Register::from(id::AX as u8 | INDIRECT).unwrap(), 0, 10)
-            .unwrap();
-        let cost2 = vm
-            .write_word_reg(&Register::from(id::DX as u8 | INDIRECT).unwrap(), 0, 19)
-            .unwrap();
+        let cost1 = vm.write_word_reg(&Register::from(id::AX as u8 | INDIRECT), 0, 10);
+        let cost2 = vm.write_word_reg(&Register::from(id::DX as u8 | INDIRECT), 0, 19);
 
         assert_eq!(vm.memory[257], 10);
         assert_eq!(vm.memory[51], 19);
@@ -180,9 +164,7 @@ mod test {
         let mut vm = VM::new();
 
         vm.registers[offset::AH] = 4;
-        let (value, cost) = vm
-            .read_byte_reg(&Register::from(id::AH as u8).unwrap(), 0)
-            .unwrap();
+        let (value, cost) = vm.read_byte_reg(&Register::from(id::AH as u8), 0);
 
         assert_eq!(value, 4);
         assert_eq!(cost, 1);
@@ -194,9 +176,7 @@ mod test {
 
         vm.registers[offset::AH] = 2;
         vm.registers[offset::AL] = 2;
-        let (value, cost) = vm
-            .read_word_reg(&Register::from(id::AX as u8).unwrap(), 0)
-            .unwrap();
+        let (value, cost) = vm.read_word_reg(&Register::from(id::AX as u8), 0);
 
         assert_eq!(value, 514);
         assert_eq!(cost, 2);
@@ -208,9 +188,7 @@ mod test {
 
         vm.registers[offset::AL] = 4;
         vm.memory[4] = 15;
-        let (value, cost) = vm
-            .read_byte_reg(&Register::from(id::AX as u8 | INDIRECT).unwrap(), 0)
-            .unwrap();
+        let (value, cost) = vm.read_byte_reg(&Register::from(id::AX as u8 | INDIRECT), 0);
 
         assert_eq!(value, 15);
         assert_eq!(cost, 3);
@@ -224,9 +202,7 @@ mod test {
         vm.registers[offset::AL] = 2;
         vm.memory[514] = 1;
         vm.memory[515] = 2;
-        let (value, cost) = vm
-            .read_word_reg(&Register::from(id::AX as u8 | INDIRECT).unwrap(), 0)
-            .unwrap();
+        let (value, cost) = vm.read_word_reg(&Register::from(id::AX as u8 | INDIRECT), 0);
 
         assert_eq!(value, 258);
         assert_eq!(cost, 4);
