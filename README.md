@@ -26,6 +26,8 @@ See more at [maikor.app](https://maikor.app) and the [project homepage](https://
 
 [REPL](https://play.vm.maikor.app)
 
+[Docs](https://docs.maikor.app)
+
 ## vm-core
 
 This is a library that executes Maikor game files in a VM. It won't run by itself though, instead it requires an external program to manage timing and frame rate to keep the code execution speed similar between platforms.
@@ -41,7 +43,8 @@ let maikor_game = read_file();
 //create an instance
 let mut vm = VM::new();
 //load the game
-vm.init(maikor_game); 
+vm.load_game(maikor_game);
+vm.init(); 
 //then
 loop {
     vm.step();

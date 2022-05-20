@@ -117,7 +117,7 @@ impl VM {
     /// stored back in the list
     /// In real hardware this isn't needed as the banks are mapped rather than copied
     // TODO think of a way to map banks
-    // reading seems easy as you can do `if in bank, read from bank` but a byte must cross boundaries
+    // reading seems easy as you can do `if in bank, read from bank` but a byte might cross boundaries
     // this could be UB but I would prefer to handle it properly
     // also it might be slower, currently reading from mem is just `mem[addr]` if banks were not
     // copied across then it would become `if in code_bank, else if in ram_bank, etc, else mem[addr]`
