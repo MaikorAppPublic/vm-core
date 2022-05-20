@@ -1,15 +1,15 @@
 use crate::offset;
 use crate::single::{test_op, test_op_init};
-use maikor_language::ops::*;
-use maikor_language::registers::flags::*;
-use maikor_language::registers::id;
+use maikor_platform::ops::*;
+use maikor_platform::registers::flags::*;
+use maikor_platform::registers::id;
 
 #[test]
 fn sub_addr_num_byte() {
     test_op(
         "SUB.B $56 10",
         &[SUB_ADDR_NUM_BYTE, 0, 56, 10],
-        &[],
+        &[(offset::FLAGS, CARRY | OVERFLOW | INTERRUPTS | SIGNED)],
         &[(56, 246)],
     );
     test_op_init(
@@ -17,7 +17,7 @@ fn sub_addr_num_byte() {
         &[SUB_ADDR_NUM_BYTE, 0, 17, 3],
         &[],
         &[(17, 15)],
-        &[],
+        &[(offset::FLAGS, INTERRUPTS)],
         &[(17, 12)],
     );
 }

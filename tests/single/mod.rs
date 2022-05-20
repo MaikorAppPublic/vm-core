@@ -3,7 +3,8 @@ use maikor_vm_core::VM;
 
 mod add;
 mod inc;
-mod mcpy;
+// mod mcpy;
+mod jmp;
 mod mul;
 mod sub;
 mod swap;
@@ -49,6 +50,7 @@ fn run_test_op(
         expected_mem[*addr] = *value;
     }
     vm.execute_op(bytes);
+    assert!(!vm.halted, "halted with {:?}", vm.error);
     compare_registers(desc, &expected_reg, &vm.registers);
     compare_memory(desc, &expected_mem, &vm.memory);
 }

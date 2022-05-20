@@ -1,7 +1,7 @@
 use crate::offset;
 use crate::single::test_op_init;
-use maikor_language::ops::*;
-use maikor_language::registers::id;
+use maikor_platform::ops::*;
+use maikor_platform::registers::id;
 
 #[test]
 fn mcpy() {

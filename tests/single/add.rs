@@ -1,9 +1,9 @@
 use crate::offset;
 use crate::single::{test_op, test_op_init};
-use maikor_language::op_params::{INDIRECT, IND_POST_INC};
-use maikor_language::ops::*;
-use maikor_language::registers::flags::*;
-use maikor_language::registers::id;
+use maikor_platform::op_params::{INDIRECT, IND_POST_INC};
+use maikor_platform::ops::*;
+use maikor_platform::registers::flags::*;
+use maikor_platform::registers::id;
 
 #[test]
 fn add_reg_num_byte() {
@@ -37,7 +37,7 @@ fn add_reg_num_byte() {
         &[
             (offset::DH, 15),
             (offset::DL, 15),
-            (offset::FLAGS, INTERRUPTS | ZERO),
+            (offset::FLAGS, INTERRUPTS | CARRY | ZERO | OVERFLOW),
         ],
         &[(3855, 0)],
     );
@@ -49,7 +49,7 @@ fn add_reg_num_byte() {
         &[
             (offset::DH, 15),
             (offset::DL, 12),
-            (offset::FLAGS, INTERRUPTS | ZERO),
+            (offset::FLAGS, INTERRUPTS | SIGNED | OVERFLOW),
         ],
         &[(3850, 200)],
     );
@@ -60,7 +60,7 @@ fn add_addr_num_byte() {
     test_op(
         "ADD.B $45 10",
         &[ADD_ADDR_NUM_BYTE, 0, 45, 10],
-        &[],
+        &[(offset::FLAGS, INTERRUPTS)],
         &[(45, 10)],
     );
     test_op_init(
@@ -68,7 +68,7 @@ fn add_addr_num_byte() {
         &[ADD_ADDR_NUM_BYTE, 0, 15, 15],
         &[],
         &[(15, 3)],
-        &[],
+        &[(offset::FLAGS, INTERRUPTS)],
         &[(15, 18)],
     );
 }
@@ -120,7 +120,7 @@ fn add_addr_reg_byte() {
         &[ADD_ADDR_REG_BYTE, 0, 45, id::CL as u8],
         &[(offset::CL, 2)],
         &[],
-        &[(offset::CL, 2), (offset::FLAGS, INTERRUPTS | ZERO)],
+        &[(offset::CL, 2), (offset::FLAGS, INTERRUPTS)],
         &[(45, 2)],
     );
     test_op_init(
@@ -128,7 +128,7 @@ fn add_addr_reg_byte() {
         &[ADD_ADDR_REG_BYTE, 0, 255, id::AL as u8],
         &[(offset::AL, 2)],
         &[(255, 10)],
-        &[(offset::AL, 2), (offset::FLAGS, INTERRUPTS | ZERO)],
+        &[(offset::AL, 2), (offset::FLAGS, INTERRUPTS)],
         &[(255, 12)],
     );
 }

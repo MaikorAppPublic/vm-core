@@ -1,8 +1,8 @@
 use crate::offset;
 use crate::single::test_op_init;
-use maikor_language::op_params::{INDIRECT, IND_POST_INC, IND_PRE_DEC};
-use maikor_language::ops::*;
-use maikor_language::registers::id;
+use maikor_platform::op_params::{INDIRECT, IND_POST_INC, IND_PRE_DEC};
+use maikor_platform::ops::*;
+use maikor_platform::registers::id;
 
 #[test]
 fn mcpy_byte() {

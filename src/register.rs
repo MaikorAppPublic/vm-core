@@ -1,4 +1,4 @@
-use maikor_language::registers::id;
+use maikor_platform::registers::id;
 
 pub mod offset {
     pub const AH: usize = 0;
@@ -18,17 +18,49 @@ pub struct Register {
     pub is_calc: bool,
     pub is_post: bool,
     pub is_inc: bool,
+    pub is_offset_reg: bool,
+    pub is_offset_ext_reg: bool,
+    pub is_offset_num: bool,
     pub size: usize,
     pub addr: usize,
 }
 
 impl Register {
-    pub fn from(byte: u8) -> Result<Register, String> {
-        let (size, start) = Register::read_reg(byte)?;
-        let mut reg = Register::read_meta(byte)?;
-        reg.addr = start;
-        reg.size = size;
-        Ok(reg)
+    pub fn from(byte: u8) -> Register {
+        use maikor_platform::op_params::*;
+        let (size, addr) = match (byte & 0x0F) as usize {
+            id::AL => (1, offset::AL),
+            id::BL => (1, offset::BL),
+            id::CL => (1, offset::CL),
+            id::DL => (1, offset::DL),
+            id::AH => (1, offset::AH),
+            id::BH => (1, offset::BH),
+            id::CH => (1, offset::CH),
+            id::DH => (1, offset::DH),
+            id::AX => (2, offset::AH),
+            id::BX => (2, offset::BH),
+            id::CX => (2, offset::CH),
+            id::DX => (2, offset::DH),
+            id::FLAGS => (1, offset::FLAGS),
+            _ => (1, offset::AH),
+        };
+
+        match byte & 0xF0 {
+            REGISTER => Register::new_no_calc(false, size, addr),
+            INDIRECT => Register::new_no_calc(true, size, addr),
+            POST_INC => Register::new_ppid(false, true, true, true, size, addr),
+            PRE_INC => Register::new_ppid(false, true, false, true, size, addr),
+            POST_DEC => Register::new_ppid(false, true, true, false, size, addr),
+            PRE_DEC => Register::new_ppid(false, true, false, false, size, addr),
+            IND_POST_INC => Register::new_ppid(true, true, true, true, size, addr),
+            IND_PRE_INC => Register::new_ppid(true, true, false, true, size, addr),
+            IND_POST_DEC => Register::new_ppid(true, true, true, false, size, addr),
+            IND_PRE_DEC => Register::new_ppid(true, true, false, false, size, addr),
+            IND_OFFSET_REG => Register::new_offset(true, false, false, size, addr),
+            IND_OFFSET_EXT_REG => Register::new_offset(false, true, false, size, addr),
+            IND_OFFSET_NUM => Register::new_offset(false, false, true, size, addr),
+            _ => Register::new_no_calc(false, size, addr),
+        }
     }
 
     pub fn id(&self) -> usize {
@@ -49,125 +81,98 @@ impl Register {
         }
     }
 
-    fn read_reg(byte: u8) -> Result<(usize, usize), String> {
-        let reg_id = (byte & 0x0F) as usize;
-        let result = match reg_id {
-            id::AL => (1, offset::AL),
-            id::BL => (1, offset::BL),
-            id::CL => (1, offset::CL),
-            id::DL => (1, offset::DL),
-            id::AH => (1, offset::AH),
-            id::BH => (1, offset::BH),
-            id::CH => (1, offset::CH),
-            id::DH => (1, offset::DH),
-            id::AX => (2, offset::AH),
-            id::BX => (2, offset::BH),
-            id::CX => (2, offset::CH),
-            id::DX => (2, offset::DH),
-            id::FLAGS => (1, offset::FLAGS),
-            _ => return Err(format!("invalid reg param: {byte}")),
-        };
-        Ok(result)
+    pub fn new_no_calc(is_indirect: bool, size: usize, addr: usize) -> Self {
+        Self {
+            is_indirect,
+            is_calc: false,
+            is_post: false,
+            is_inc: false,
+            is_offset_reg: false,
+            is_offset_ext_reg: false,
+            is_offset_num: false,
+            size,
+            addr,
+        }
     }
 
-    fn read_meta(byte: u8) -> Result<Register, String> {
-        use maikor_language::op_params::*;
-        let reg = match byte & 0xF0 {
-            REGISTER => Register {
-                ..Register::default()
-            },
-            POST_INC => Register {
-                is_calc: true,
-                is_post: true,
-                is_inc: true,
-                ..Register::default()
-            },
-            PRE_INC => Register {
-                is_calc: true,
-                is_inc: true,
-                ..Register::default()
-            },
-            POST_DEC => Register {
-                is_calc: true,
-                is_post: true,
-                ..Register::default()
-            },
-            PRE_DEC => Register {
-                is_calc: true,
-                ..Register::default()
-            },
-            INDIRECT => Register {
-                is_indirect: true,
-                ..Register::default()
-            },
-            IND_POST_INC => Register {
-                is_calc: true,
-                is_post: true,
-                is_inc: true,
-                is_indirect: true,
-                ..Register::default()
-            },
-            IND_PRE_INC => Register {
-                is_calc: true,
-                is_inc: true,
-                is_indirect: true,
-                ..Register::default()
-            },
-            IND_POST_DEC => Register {
-                is_calc: true,
-                is_post: true,
-                is_indirect: true,
-                ..Register::default()
-            },
-            IND_PRE_DEC => Register {
-                is_calc: true,
-                is_indirect: true,
-                ..Register::default()
-            },
-            _ => return Err(format!("invalid reg meta: {} -> {}", byte, byte & 0xF0)),
-        };
-        Ok(reg)
+    pub fn new_offset(
+        is_offset_reg: bool,
+        is_offset_ext_reg: bool,
+        is_offset_num: bool,
+        size: usize,
+        addr: usize,
+    ) -> Self {
+        Self {
+            is_indirect: true,
+            is_calc: false,
+            is_post: false,
+            is_inc: false,
+            is_offset_reg,
+            is_offset_ext_reg,
+            is_offset_num,
+            size,
+            addr,
+        }
+    }
+
+    pub fn new_ppid(
+        is_indirect: bool,
+        is_calc: bool,
+        is_post: bool,
+        is_inc: bool,
+        size: usize,
+        addr: usize,
+    ) -> Self {
+        Self {
+            is_indirect,
+            is_calc,
+            is_post,
+            is_inc,
+            is_offset_reg: false,
+            is_offset_ext_reg: false,
+            is_offset_num: false,
+            size,
+            addr,
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::register::offset;
+    use maikor_platform::op_params::{INDIRECT, IND_OFFSET_NUM, IND_PRE_DEC, POST_INC};
 
     #[test]
     fn check_reg_from() {
         assert_eq!(
-            Register::from(id::AL as u8).unwrap(),
-            Register {
-                is_indirect: false,
-                is_calc: false,
-                is_post: false,
-                is_inc: false,
-                size: 1,
-                addr: 1
-            }
+            Register::from(id::AL as u8),
+            Register::new_no_calc(false, 1, offset::AL)
         );
+
         assert_eq!(
-            Register::from(id::AH as u8).unwrap(),
-            Register {
-                is_indirect: false,
-                is_calc: false,
-                is_post: false,
-                is_inc: false,
-                size: 1,
-                addr: 0
-            }
+            Register::from(id::BX as u8),
+            Register::new_no_calc(false, 2, offset::BH)
         );
+
         assert_eq!(
-            Register::from(id::AX as u8).unwrap(),
-            Register {
-                is_indirect: false,
-                is_calc: false,
-                is_post: false,
-                is_inc: false,
-                size: 2,
-                addr: 0
-            }
+            Register::from(id::CX as u8 | INDIRECT),
+            Register::new_no_calc(true, 2, offset::CH)
+        );
+
+        assert_eq!(
+            Register::from(id::AL as u8 | POST_INC),
+            Register::new_ppid(false, true, true, true, 1, offset::AL)
+        );
+
+        assert_eq!(
+            Register::from(id::DX as u8 | IND_PRE_DEC),
+            Register::new_ppid(true, true, false, false, 2, offset::DH)
+        );
+
+        assert_eq!(
+            Register::from(id::BX as u8 | IND_OFFSET_NUM),
+            Register::new_offset(false, false, true, 2, offset::BH)
         );
     }
 }

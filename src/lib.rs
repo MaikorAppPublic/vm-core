@@ -1,18 +1,12 @@
-use crate::execute_command::ArgParams;
-use crate::internals::memory_access::MemoryAccess;
 use crate::mem::{address, sizes};
 use crate::register::offset;
-use crate::types::Byte;
-use maikor_language::constants::SPRITE_COUNT;
-use maikor_language::ops::get_byte_count;
-use maikor_language::{registers, SAVE_COUNT};
+use maikor_platform::constants::{SAVE_COUNT, SPRITE_COUNT};
+use maikor_platform::registers;
 
-mod commands;
-mod execute_command;
 mod internals;
 mod mem;
+mod ops;
 mod register;
-mod types;
 
 pub struct VM {
     /// Order is AH, AL, BH, BL, CH, CL, DH, DL, FLG
@@ -20,8 +14,8 @@ pub struct VM {
     /// AX is \[AH,AL]
     pub registers: [u8; registers::SIZE],
     pub pc: u16,
-    //All changes MUST go through debug_set_mem or debug_set_mem_range
-    //otherwise banks won't change, etc
+    /// All changes MUST go through debug_set_mem or debug_set_mem_range
+    /// otherwise banks won't change, etc
     pub memory: [u8; sizes::TOTAL],
     pub ram_banks: Vec<[u8; sizes::RAM_BANK]>,
     pub code_banks: Vec<[u8; sizes::CODE_BANK]>,
@@ -31,7 +25,6 @@ pub struct VM {
     /// `memory[SAVE_CONTROL]` should set to 0)
     pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
-    pub mem_change_affects_flags: bool,
     pub error: Option<String>,
     /// if true the VM has stopped (EoF or error) and can't continue
     pub halted: bool,
@@ -40,7 +33,7 @@ pub struct VM {
     /// Count of cycles executed this session
     pub cycles_executed: usize,
     /// index in memory where arguments are being read from
-    arg_ptr: usize,
+    arg_ptr: u16,
 }
 
 impl VM {
@@ -51,7 +44,7 @@ impl VM {
         let mut memory = [0; sizes::TOTAL];
         //disable all sprites by default
         for i in 0..SPRITE_COUNT {
-            let addr = i * sizes::SPRITE + address::SPRITE_TABLE.0 as usize;
+            let addr = i * sizes::SPRITE + address::SPRITE_TABLE;
             memory[addr + 2] = 255;
             memory[addr + 3] = 128;
         }
@@ -69,11 +62,53 @@ impl VM {
             save_banks: vec![],
             save_dirty_flag: [false; SAVE_COUNT],
             atlas_banks: vec![],
-            mem_change_affects_flags: false,
             error: None,
             halted: false,
             op_executed: 0,
+            cycles_executed: 0,
             arg_ptr: 0,
+        }
+    }
+}
+
+impl VM {
+    fn fail(&mut self, error_message: String) {
+        self.error = Some(format!("{}\n{}", error_message, self.dump()));
+        self.halted = true;
+    }
+}
+
+impl VM {
+    /// Load game and saves
+    /// This only copies data to banks, it doesn't reset PC, registers, etc
+    /// Call [VM::init()] once before any [VM::step()] calls
+    pub fn load_game(&mut self, game: Vec<u8>, saves: &[[u8; sizes::SAVE_BANK]]) {
+        for (i, save_data) in saves.iter().enumerate() {
+            unsafe {
+                let dst = self
+                    .get_memory_mut(
+                        address::SAVE_BANK + (i * sizes::SAVE_BANK),
+                        sizes::SAVE_BANK,
+                    )
+                    .as_mut_ptr();
+                std::ptr::copy_nonoverlapping(save_data.as_ptr(), dst, sizes::SAVE_BANK);
+            }
+        }
+        todo!()
+    }
+
+    /// Loads initial banks
+    /// This should be called after `load_game()` and any needed changes are made
+    /// Once this has been called the banks and memory shouldn't be changed by the host
+    /// (except for setting flags, interrupts, etc)
+    pub fn init(&mut self) {
+        self.write_byte_mem(address::RAM_BANK_ID as u16, 0);
+        self.write_byte_mem(address::CODE_BANK_ID as u16, 0);
+        self.write_byte_mem(address::ATLAS1_BANK_ID as u16, 0);
+        if self.atlas_banks.len() > 1 {
+            self.write_byte_mem(address::ATLAS2_BANK_ID as u16, 1);
+        } else {
+            self.write_byte_mem(address::ATLAS2_BANK_ID as u16, 0);
         }
     }
 }
@@ -87,21 +122,24 @@ impl VM {
     /// returns number of cycles used  
     pub fn step(&mut self) -> usize {
         if self.halted {
-            return;
+            return 0;
         }
         let op_byte = self.memory[self.pc as usize];
-        let param_byte_count = get_byte_count(op_byte);
-        self.arg_ptr = (self.pc + 1) as usize;
-        // let arg_params = ArgParams::new(&self.memory, self.pc as usize + 1, param_byte_count);
-        let result = self.execute(op_byte);
-        match result {
-            Ok(jumped) => {
+        self.arg_ptr = self.pc + 1;
+        match self.execute(op_byte) {
+            Ok((jumped, cycles)) => {
                 if !jumped {
-                    self.pc = self.pc.wrapping_add((1 + param_byte_count) as u16);
+                    //arg_ptr is advanced as operands are read
+                    //and should be at byte of the next op when this one has completed
+                    self.pc = self.arg_ptr;
                 }
+                self.cycles_executed += cycles;
+                self.op_executed += 1;
+                return cycles;
             }
             Err(msg) => self.fail(msg),
         }
+        0
     }
 
     /// Run arbitrary op, does not advance PC automatically (JMP, etc ops still work)
@@ -110,23 +148,20 @@ impl VM {
         if bytes.is_empty() {
             panic!("Must have at least one byte");
         }
-        // let param_byte_count = get_byte_count(bytes[0]);
-        // let arg_params = ArgParams::new(&bytes, 1, param_byte_count);
-        // let result = self.execute(bytes[0], arg_params);
-        // if result.is_err() {
-        //     self.fail(result.err().unwrap());
-        // }
-    }
-
-    pub fn fail(&mut self, error_message: String) {
-        self.error = Some(format!("{}\n{}", error_message, self.dump()));
-        self.halted = true;
+        for (i, b) in bytes.iter().enumerate() {
+            self.memory[address::RESERVED + i] = *b;
+        }
+        self.arg_ptr = (address::RESERVED + 1) as u16;
+        let result = self.execute(bytes[0]);
+        if let Err(msg) = result {
+            self.fail(msg);
+        }
     }
 
     /// Writes registers to String
     pub fn dump(&self) -> String {
         format!(
-            "{}\n{}\n{}",
+            "{}\n{}\n{}\n{}\n{}",
             format_args!(
                 "AH: {:02X}  AL: {:02X}  BH: {:02X}  BL: {:02X}",
                 self.registers[0], self.registers[1], self.registers[2], self.registers[3]
@@ -144,7 +179,7 @@ impl VM {
             ),
             format_args!(
                 "Stack: {}",
-                self.memory[address::STACK..address::STACK + self.get_sp() as usize]
+                self.memory[address::STACK..self.get_sp() as usize]
                     .iter()
                     .map(|num| format!("{:02X}", num))
                     .collect::<Vec<String>>()
@@ -167,16 +202,15 @@ impl VM {
     /// Set one byte in memory
     /// This will trigger interrupts, bank switching, etc
     pub fn debug_set_mem(&mut self, addr: u16, value: u8) {
-        self.write_mem(addr.into(), Byte::from(value));
+        self.write_byte_mem(addr, value);
     }
-}
 
     /// Set bytes in memory
     /// This will trigger interrupts, bank switching, etc
     pub fn debug_set_mem_range(&mut self, addr: u16, values: &[u8]) {
-        let addr = addr.into();
+        let addr = addr;
         for value in values {
-            self.write_mem(addr, Byte::from(*value));
+            self.write_byte_mem(addr, *value);
         }
     }
 }

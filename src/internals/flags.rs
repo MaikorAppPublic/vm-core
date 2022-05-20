@@ -1,26 +1,25 @@
 use crate::register::offset;
 use crate::registers::flags;
-use crate::types::{Byte, Word};
 use crate::VM;
 use std::ops::{BitAnd, BitOr, Not};
 
 impl VM {
-    #[inline]
+    #[inline(always)]
     pub fn check_flag(&self, flag: u8) -> bool {
         self.registers[offset::FLAGS].bitand(flag) == flag
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn set_flag(&mut self, flag: u8) {
         self.registers[offset::FLAGS] = self.registers[offset::FLAGS].bitor(flag)
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn clear_flag(&mut self, flag: u8) {
         self.registers[offset::FLAGS] = self.registers[offset::FLAGS].bitand(flag.not())
     }
 
-    #[inline]
+    #[inline(always)]
     fn update_flag_conditionally(&mut self, flag: u8, condition: bool) {
         if condition {
             self.set_flag(flag);
@@ -30,93 +29,89 @@ impl VM {
     }
 }
 
-pub trait FirstBitSet {
-    fn is_first_bit_set(&self) -> bool;
+#[inline(always)]
+fn is_first_bit_set_byte(value: u8) -> bool {
+    value & 0b10000000 == 0b10000000
 }
 
-impl FirstBitSet for Byte {
-    #[inline]
-    fn is_first_bit_set(&self) -> bool {
-        self.0 & 0b10000000 == 0b10000000
-    }
+#[inline(always)]
+fn is_first_bit_set_word(value: u16) -> bool {
+    value & 0b1000000000000000 == 0b1000000000000000
 }
 
-impl FirstBitSet for Word {
-    #[inline]
-    fn is_first_bit_set(&self) -> bool {
-        self.0 & 0b1000000000000000 == 0b1000000000000000
-    }
+#[inline(always)]
+pub fn has_overflowed_byte(lhs: u8, rhs: u8) -> bool {
+    is_first_bit_set_byte(lhs) ^ is_first_bit_set_byte(rhs)
 }
 
-pub trait Flags<T> {
-    fn set_flags(&mut self, value: T);
-    fn set_math_flags(&mut self, value: T, set_carry: bool, set_overflow: bool);
-    fn set_cmp_flags(&mut self, lhs: T, rhs: T, signed: bool);
+#[inline(always)]
+pub fn has_overflowed_word(lhs: u16, rhs: u16) -> bool {
+    is_first_bit_set_word(lhs) ^ is_first_bit_set_word(rhs)
 }
 
-impl Flags<Byte> for VM {
-    fn set_flags(&mut self, value: Byte) {
-        self.update_flag_conditionally(flags::ZERO, value == Byte::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, value.is_first_bit_set());
+impl VM {
+    pub fn set_flags_byte(&mut self, value: u8) {
+        self.update_flag_conditionally(flags::ZERO, value == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_byte(value));
         self.clear_flag(flags::GREATER_THAN);
         self.clear_flag(flags::LESS_THAN);
         self.clear_flag(flags::OVERFLOW);
         self.clear_flag(flags::CARRY);
     }
 
-    fn set_math_flags(&mut self, value: Byte, set_carry: bool, set_overflow: bool) {
-        self.update_flag_conditionally(flags::ZERO, value == Byte::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, value.is_first_bit_set());
+    pub fn set_math_flags_byte(&mut self, value: u8, set_carry: bool, set_overflow: bool) {
+        self.update_flag_conditionally(flags::ZERO, value == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_byte(value));
         self.clear_flag(flags::GREATER_THAN);
         self.clear_flag(flags::LESS_THAN);
         self.update_flag_conditionally(flags::OVERFLOW, set_overflow);
         self.update_flag_conditionally(flags::CARRY, set_carry);
     }
 
-    fn set_cmp_flags(&mut self, lhs: Byte, rhs: Byte, signed: bool) {
+    pub fn set_cmp_flags_byte(&mut self, lhs: u8, rhs: u8, signed: bool) {
         if signed {
-            self.update_flag_conditionally(flags::LESS_THAN, (lhs.0 as i8) < (rhs.0 as i8));
-            self.update_flag_conditionally(flags::GREATER_THAN, lhs.0 as i8 > rhs.0 as i8);
+            self.update_flag_conditionally(flags::LESS_THAN, (lhs as i8) < (rhs as i8));
+            self.update_flag_conditionally(flags::GREATER_THAN, lhs as i8 > rhs as i8);
         } else {
             self.update_flag_conditionally(flags::LESS_THAN, lhs < rhs);
             self.update_flag_conditionally(flags::GREATER_THAN, lhs > rhs);
         }
-        self.update_flag_conditionally(flags::ZERO, lhs == Byte::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, lhs.is_first_bit_set());
+        self.update_flag_conditionally(flags::ZERO, lhs == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_byte(lhs));
         self.clear_flag(flags::CARRY);
         self.clear_flag(flags::OVERFLOW);
     }
 }
 
-impl Flags<Word> for VM {
-    fn set_flags(&mut self, value: Word) {
-        self.update_flag_conditionally(flags::ZERO, value == Word::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, value.is_first_bit_set());
+impl VM {
+    pub fn set_flags_word(&mut self, value: u16) {
+        self.update_flag_conditionally(flags::ZERO, value == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_word(value));
         self.clear_flag(flags::GREATER_THAN);
         self.clear_flag(flags::LESS_THAN);
         self.clear_flag(flags::OVERFLOW);
         self.clear_flag(flags::CARRY);
     }
 
-    fn set_math_flags(&mut self, value: Word, set_carry: bool, set_overflow: bool) {
-        self.update_flag_conditionally(flags::ZERO, value == Word::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, value.is_first_bit_set());
+    pub fn set_math_flags_word(&mut self, value: u16, set_carry: bool, set_overflow: bool) {
+        self.update_flag_conditionally(flags::ZERO, value == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_word(value));
         self.clear_flag(flags::GREATER_THAN);
         self.clear_flag(flags::LESS_THAN);
         self.update_flag_conditionally(flags::OVERFLOW, set_overflow);
         self.update_flag_conditionally(flags::CARRY, set_carry);
     }
 
-    fn set_cmp_flags(&mut self, lhs: Word, rhs: Word, signed: bool) {
+    pub fn set_cmp_flags_word(&mut self, lhs: u16, rhs: u16, signed: bool) {
         if signed {
-            self.update_flag_conditionally(flags::LESS_THAN, (lhs.0 as i16) < (rhs.0 as i16));
-            self.update_flag_conditionally(flags::GREATER_THAN, lhs.0 as i16 > rhs.0 as i16);
+            self.update_flag_conditionally(flags::LESS_THAN, (lhs as i16) < (rhs as i16));
+            self.update_flag_conditionally(flags::GREATER_THAN, lhs as i16 > rhs as i16);
         } else {
             self.update_flag_conditionally(flags::LESS_THAN, lhs < rhs);
             self.update_flag_conditionally(flags::GREATER_THAN, lhs > rhs);
         }
-        self.update_flag_conditionally(flags::ZERO, lhs == Word::ZERO);
-        self.update_flag_conditionally(flags::SIGNED, lhs.is_first_bit_set());
+        self.update_flag_conditionally(flags::ZERO, lhs == 0);
+        self.update_flag_conditionally(flags::SIGNED, is_first_bit_set_word(lhs));
         self.clear_flag(flags::CARRY);
         self.clear_flag(flags::OVERFLOW);
     }
@@ -125,34 +120,32 @@ impl Flags<Word> for VM {
 #[cfg(test)]
 mod test {
     use super::*;
-    use maikor_language::ops;
-    use maikor_language::registers::flags::*;
-    use maikor_language::registers::id;
+    use maikor_platform::registers::flags::*;
 
     #[test]
     fn test_is_first_bit_set_byte() {
         for i in 0..128 {
-            assert!(!Byte(i).is_first_bit_set(), "{i}")
+            assert!(!is_first_bit_set_byte(i), "{i}")
         }
         for i in 128..255 {
-            assert!(Byte(i).is_first_bit_set(), "{i}")
+            assert!(is_first_bit_set_byte(i), "{i}")
         }
     }
 
     #[test]
     fn test_if_first_bit_set_word() {
         for i in 0..32768 {
-            assert!(!Word(i).is_first_bit_set(), "{i}")
+            assert!(!is_first_bit_set_word(i), "{i}")
         }
         for i in 32768..65535 {
-            assert!(Word(i).is_first_bit_set(), "{i}")
+            assert!(is_first_bit_set_word(i), "{i}")
         }
     }
 
     #[test]
-    fn test_set_cmp_flags() {
+    fn test_set_cmp_flags_byte() {
         let mut vm = VM::new();
-        vm.set_cmp_flags(Byte(5), Byte(10), false);
+        vm.set_cmp_flags_byte(5, 10, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(vm.check_flag(LESS_THAN));
@@ -160,7 +153,7 @@ mod test {
         assert!(!vm.check_flag(CARRY));
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
-        vm.set_cmp_flags(Byte(10), Byte(5), false);
+        vm.set_cmp_flags_byte(10, 5, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -168,7 +161,7 @@ mod test {
         assert!(!vm.check_flag(CARRY));
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
-        vm.set_cmp_flags(Byte(10), Byte(10), false);
+        vm.set_cmp_flags_byte(10, 10, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -176,7 +169,7 @@ mod test {
         assert!(!vm.check_flag(CARRY));
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
-        vm.set_cmp_flags(Byte(0), Byte(5), false);
+        vm.set_cmp_flags_byte(0, 5, false);
         assert!(vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(vm.check_flag(LESS_THAN));
@@ -184,7 +177,7 @@ mod test {
         assert!(!vm.check_flag(CARRY));
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
-        vm.set_cmp_flags(Byte(255), Byte(5), false);
+        vm.set_cmp_flags_byte(255, 5, false);
         assert!(!vm.check_flag(ZERO));
         assert!(vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -192,7 +185,7 @@ mod test {
         assert!(!vm.check_flag(CARRY));
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
-        vm.set_cmp_flags(Byte(255), Byte(5), true);
+        vm.set_cmp_flags_byte(255, 5, true);
         assert!(!vm.check_flag(ZERO));
         assert!(vm.check_flag(SIGNED));
         assert!(vm.check_flag(LESS_THAN));
@@ -203,9 +196,9 @@ mod test {
     }
 
     #[test]
-    fn test_set_math_flags() {
+    fn test_set_math_flags_byte() {
         let mut vm = VM::new();
-        vm.set_math_flags(Byte(64), false, false);
+        vm.set_math_flags_byte(64, false, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -214,7 +207,7 @@ mod test {
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
 
-        vm.set_math_flags(Byte(64), true, true);
+        vm.set_math_flags_byte(64, true, true);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -223,7 +216,7 @@ mod test {
         assert!(vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
 
-        vm.set_math_flags(Byte(0), true, true);
+        vm.set_math_flags_byte(0, true, true);
         assert!(vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -232,7 +225,133 @@ mod test {
         assert!(vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(INTERRUPTS));
 
-        vm.set_math_flags(Byte(200), false, true);
+        vm.set_math_flags_byte(200, false, true);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+    }
+
+    #[test]
+    fn test_set_cmp_flags_word() {
+        let mut vm = VM::new();
+        vm.set_cmp_flags_word(5, 10, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(10, 5, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(10, 10, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(0, 5, false);
+        assert!(vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(55255, 5, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(64255, 5, true);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(0, 1235, false);
+        assert!(vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(41255, 5, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+        vm.set_cmp_flags_word(39255, 12215, true);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+    }
+
+    #[test]
+    fn test_set_math_flags_word() {
+        let mut vm = VM::new();
+        vm.set_math_flags_word(64, false, false);
+        assert!(!vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(!vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+
+        vm.set_math_flags_word(64, true, true);
+        assert!(!vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(vm.check_flag(CARRY));
+        assert!(vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+
+        vm.set_math_flags_word(0, true, true);
+        assert!(vm.check_flag(ZERO));
+        assert!(!vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(vm.check_flag(CARRY));
+        assert!(vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+
+        vm.set_math_flags_word(45200, false, true);
+        assert!(!vm.check_flag(ZERO));
+        assert!(vm.check_flag(SIGNED));
+        assert!(!vm.check_flag(LESS_THAN));
+        assert!(!vm.check_flag(GREATER_THAN));
+        assert!(!vm.check_flag(CARRY));
+        assert!(vm.check_flag(OVERFLOW));
+        assert!(vm.check_flag(INTERRUPTS));
+
+        vm.set_math_flags_word(42000, false, true);
         assert!(!vm.check_flag(ZERO));
         assert!(vm.check_flag(SIGNED));
         assert!(!vm.check_flag(LESS_THAN));
@@ -299,29 +418,6 @@ mod test {
         assert!(vm.check_flag(GREATER_THAN));
         assert!(!vm.check_flag(LESS_THAN));
         assert!(!vm.check_flag(ZERO));
-        assert!(vm.check_flag(INTERRUPTS));
-    }
-
-    #[test]
-    fn test_inc() {
-        let mut vm = VM::new();
-
-        assert!(!vm.check_flag(CARRY));
-        assert!(vm.check_flag(ZERO));
-        assert!(!vm.check_flag(SIGNED));
-        assert!(!vm.check_flag(OVERFLOW));
-        assert!(!vm.check_flag(LESS_THAN));
-        assert!(!vm.check_flag(GREATER_THAN));
-        assert!(vm.check_flag(INTERRUPTS));
-
-        vm.execute_op(&[ops::INC_REG_BYTE, id::AL as u8]);
-
-        assert!(!vm.check_flag(CARRY));
-        assert!(!vm.check_flag(ZERO));
-        assert!(!vm.check_flag(SIGNED));
-        assert!(!vm.check_flag(OVERFLOW));
-        assert!(!vm.check_flag(LESS_THAN));
-        assert!(!vm.check_flag(GREATER_THAN));
         assert!(vm.check_flag(INTERRUPTS));
     }
 }
