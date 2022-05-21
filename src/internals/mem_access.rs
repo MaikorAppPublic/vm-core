@@ -81,7 +81,7 @@ impl VM {
                 }
             }
             address::ATLAS1_BANK_ID => {
-                if value >= self.atlas_banks.len() {
+                if value < self.atlas_banks.len() {
                     self.load_bank(
                         address::ATLAS1,
                         sizes::ATLAS,
@@ -91,7 +91,7 @@ impl VM {
                 }
             }
             address::ATLAS2_BANK_ID => {
-                if value >= self.atlas_banks.len() {
+                if value < self.atlas_banks.len() {
                     self.load_bank(
                         address::ATLAS2,
                         sizes::ATLAS,
