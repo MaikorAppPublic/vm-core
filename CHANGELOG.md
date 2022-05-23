@@ -1,5 +1,11 @@
 ## Pre-alpha
 
+### 0.1.8
+- *BREAKING CHANGE*
+- Fix bug with atlas bank swapping
+- Update dependencies
+  - Language to 0.1.21
+
 ### 0.1.7
 - Fix `debug_set_mem_range`
 - Change sprite table to start as all 0s
