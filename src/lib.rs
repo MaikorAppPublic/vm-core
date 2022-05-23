@@ -1,6 +1,6 @@
 use crate::mem::{address, sizes};
 use crate::register::offset;
-use maikor_platform::constants::{SAVE_COUNT, SPRITE_COUNT};
+use maikor_platform::constants::SAVE_COUNT;
 use maikor_platform::registers;
 
 mod internals;
@@ -96,13 +96,62 @@ impl VM {
     /// Once this has been called the banks and memory shouldn't be changed by the host
     /// (except for setting flags, interrupts, etc)
     pub fn init(&mut self) {
-        self.write_byte_mem(address::RAM_BANK_ID as u16, 0);
-        self.write_byte_mem(address::CODE_BANK_ID as u16, 0);
-        self.write_byte_mem(address::ATLAS1_BANK_ID as u16, 0);
-        if self.atlas_banks.len() > 1 {
-            self.write_byte_mem(address::ATLAS2_BANK_ID as u16, 1);
+        self.init_bank(
+            "CODE",
+            address::CODE_BANK_ID,
+            0,
+            self.code_banks.len(),
+            None,
+        );
+        self.init_bank("RAM", address::RAM_BANK_ID, 0, self.ram_banks.len(), None);
+        self.init_bank(
+            "ATLAS 1",
+            address::ATLAS1_BANK_ID,
+            0,
+            self.atlas_banks.len(),
+            None,
+        );
+        self.init_bank(
+            "ATLAS 2",
+            address::ATLAS2_BANK_ID,
+            1,
+            self.atlas_banks.len(),
+            Some(0),
+        );
+        self.init_bank(
+            "ATLAS 3",
+            address::ATLAS3_BANK_ID,
+            2,
+            self.atlas_banks.len(),
+            Some(0),
+        );
+        self.init_bank(
+            "ATLAS 4",
+            address::ATLAS4_BANK_ID,
+            3,
+            self.atlas_banks.len(),
+            Some(0),
+        );
+    }
+
+    fn init_bank(
+        &mut self,
+        bank_name: &str,
+        addr: usize,
+        id: u8,
+        len: usize,
+        backup_id: Option<u8>,
+    ) {
+        if ((id as usize) < len) && backup_id.is_none() {
+            panic!(
+                "Attempted to load {bank_name} {id} during init, but only {} available",
+                len - 1
+            );
+        }
+        if len > id as usize {
+            self.write_byte_mem(addr as u16, id);
         } else {
-            self.write_byte_mem(address::ATLAS2_BANK_ID as u16, 0);
+            self.write_byte_mem(addr as u16, backup_id.unwrap());
         }
     }
 }

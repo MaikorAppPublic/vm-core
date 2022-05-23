@@ -28,7 +28,7 @@ pub struct Register {
 impl Register {
     pub fn from(byte: u8) -> Register {
         use maikor_platform::op_params::*;
-        let (size, addr) = match (byte & 0x0F) as usize {
+        let (size, addr) = match byte & 0x0F {
             id::AL => (1, offset::AL),
             id::BL => (1, offset::BL),
             id::CL => (1, offset::CL),
@@ -63,7 +63,7 @@ impl Register {
         }
     }
 
-    pub fn id(&self) -> usize {
+    pub fn id(&self) -> u8 {
         match (self.addr, self.size) {
             (offset::AH, 2) => id::AX,
             (offset::AL, 1) => id::AL,

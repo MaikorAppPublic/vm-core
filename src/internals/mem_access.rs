@@ -100,6 +100,26 @@ impl VM {
                     return 20;
                 }
             }
+            address::ATLAS3_BANK_ID => {
+                if value < self.atlas_banks.len() {
+                    self.load_bank(
+                        address::ATLAS3,
+                        sizes::ATLAS,
+                        self.atlas_banks[value].as_ptr(),
+                    );
+                    return 20;
+                }
+            }
+            address::ATLAS4_BANK_ID => {
+                if value < self.atlas_banks.len() {
+                    self.load_bank(
+                        address::ATLAS4,
+                        sizes::ATLAS,
+                        self.atlas_banks[value].as_ptr(),
+                    );
+                    return 20;
+                }
+            }
             _ => {}
         }
 
@@ -150,6 +170,16 @@ impl VM {
             let atlas_bank_addr = addr - address::ATLAS2;
             atlas_bank[atlas_bank_addr] = value;
             1
+        } else if is_inside_atlas3_bank(addr) {
+            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS3_BANK_ID] as usize];
+            let atlas_bank_addr = addr - address::ATLAS3;
+            atlas_bank[atlas_bank_addr] = value;
+            1
+        } else if is_inside_atlas4_bank(addr) {
+            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS4_BANK_ID] as usize];
+            let atlas_bank_addr = addr - address::ATLAS4;
+            atlas_bank[atlas_bank_addr] = value;
+            1
         } else {
             0
         }
@@ -179,6 +209,16 @@ fn is_inside_atlas1_bank(addr: usize) -> bool {
 #[inline]
 fn is_inside_atlas2_bank(addr: usize) -> bool {
     (address::ATLAS2..(address::ATLAS2 + sizes::ATLAS)).contains(&addr)
+}
+
+#[inline]
+fn is_inside_atlas3_bank(addr: usize) -> bool {
+    (address::ATLAS3..(address::ATLAS3 + sizes::ATLAS)).contains(&addr)
+}
+
+#[inline]
+fn is_inside_atlas4_bank(addr: usize) -> bool {
+    (address::ATLAS4..(address::ATLAS4 + sizes::ATLAS)).contains(&addr)
 }
 
 #[cfg(test)]

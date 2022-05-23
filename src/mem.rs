@@ -39,6 +39,8 @@ pub mod address {
     pub const SAVE_BANK: usize = address::SAVE_BANK as usize;
     pub const ATLAS1: usize = address::ATLAS1 as usize;
     pub const ATLAS2: usize = address::ATLAS2 as usize;
+    pub const ATLAS3: usize = address::ATLAS3 as usize;
+    pub const ATLAS4: usize = address::ATLAS4 as usize;
     pub const PALETTES: usize = address::PALETTES as usize;
     pub const SPRITE_TABLE: usize = address::SPRITE_TABLE as usize;
     pub const LAYER_HEADERS: usize = address::LAYER_HEADERS as usize;
@@ -47,6 +49,8 @@ pub mod address {
     pub const RAM_BANK_ID: usize = address::RAM_BANK_ID as usize;
     pub const ATLAS1_BANK_ID: usize = address::ATLAS1_BANK_ID as usize;
     pub const ATLAS2_BANK_ID: usize = address::ATLAS2_BANK_ID as usize;
+    pub const ATLAS3_BANK_ID: usize = address::ATLAS3_BANK_ID as usize;
+    pub const ATLAS4_BANK_ID: usize = address::ATLAS4_BANK_ID as usize;
     pub const SP: usize = address::SP as usize;
     pub const FP: usize = address::FP as usize;
     pub const RESERVED: usize = address::RESERVED as usize;

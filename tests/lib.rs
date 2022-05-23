@@ -67,7 +67,7 @@ pub fn compare_registers(text: &str, expected_values: &[u8; 9], actual_values: &
     }
 }
 
-fn offset_to_id(offset_byte: usize) -> usize {
+fn offset_to_id(offset_byte: usize) -> u8 {
     match offset_byte {
         offset::AH => id::AH,
         offset::AL => id::AL,

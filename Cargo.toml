@@ -1,6 +1,6 @@
 [package]
 name = "maikor-vm-core"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 authors = ["Ray Britton <raybritton@pm.me>"]
 description = "VM for playing Maikor games"
@@ -12,7 +12,7 @@ keywords = ["game","gamedev","2d","vm"]
 categories = ["games"]
 
 [dependencies]
-maikor-platform = "0.1.19"
+maikor-platform = "0.1.21"
 log = "0.4.17"
 
 [dev-dependencies]
