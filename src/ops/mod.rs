@@ -42,7 +42,7 @@ mod test {
     use maikor_platform::mem::address::RESERVED;
 
     pub fn check_cycles(bytes: &[u8], expected_cycles: usize, method: fn(&mut VM) -> usize) {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;
         for (i, byte) in bytes.iter().enumerate() {
             vm.memory[RESERVED as usize + i] = *byte;
@@ -55,7 +55,7 @@ mod test {
         expected_cycles: usize,
         method: fn(&mut VM) -> (bool, usize),
     ) {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;
         for (i, byte) in bytes.iter().enumerate() {
             vm.memory[RESERVED as usize + i] = *byte;

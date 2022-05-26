@@ -36,7 +36,7 @@ pub fn test_jmp_addr() {
 
 fn test_jump_addr(name: &str, op: u8, less: bool, greater: bool, pc: u16) {
     let desc = format!("addr {} {} {} {}", name, less, greater, pc);
-    let mut vm = VM::new();
+    let mut vm = VM::new_test();
     if less {
         vm.set_flag(LESS_THAN);
     }
@@ -87,7 +87,7 @@ pub fn test_jmp_reg() {
 
 fn test_jump_reg(name: &str, op: u8, less: bool, greater: bool, pc: u16) {
     let desc = format!("reg {} {} {} {}", name, less, greater, pc);
-    let mut vm = VM::new();
+    let mut vm = VM::new_test();
     if less {
         vm.set_flag(LESS_THAN);
     }

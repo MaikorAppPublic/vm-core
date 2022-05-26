@@ -222,7 +222,7 @@ mod test {
         math_method: fn(u8, u8) -> (u8, bool),
         op_method: fn(&mut VM, fn(u8, u8) -> (u8, bool)) -> usize,
     ) {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;
         for (i, byte) in bytes.iter().enumerate() {
             vm.memory[RESERVED as usize + i] = *byte;
@@ -236,7 +236,7 @@ mod test {
         math_method: fn(u16, u16) -> (u16, bool),
         op_method: fn(&mut VM, fn(u16, u16) -> (u16, bool)) -> usize,
     ) {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;
         for (i, byte) in bytes.iter().enumerate() {
             vm.memory[RESERVED as usize + i] = *byte;

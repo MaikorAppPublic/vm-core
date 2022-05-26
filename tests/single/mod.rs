@@ -11,7 +11,7 @@ mod swap;
 
 //execute op on a new vm, and compare registers and memory afterwards
 fn test_op(desc: &str, bytes: &[u8], registers: &[(usize, u8)], memory: &[(usize, u8)]) {
-    run_test_op(VM::new(), desc, bytes, registers, memory);
+    run_test_op(VM::new_test(), desc, bytes, registers, memory);
 }
 
 //execute op on a new vm setup with initial state for registers and memory,
@@ -24,7 +24,7 @@ fn test_op_init(
     registers: &[(usize, u8)],
     memory: &[(usize, u8)],
 ) {
-    let mut vm = VM::new();
+    let mut vm = VM::new_test();
     for (addr, value) in init_registers {
         vm.registers[*addr] = *value;
     }

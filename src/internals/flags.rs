@@ -144,7 +144,7 @@ mod test {
 
     #[test]
     fn test_set_cmp_flags_byte() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.set_cmp_flags_byte(5, 10, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
@@ -197,7 +197,7 @@ mod test {
 
     #[test]
     fn test_set_math_flags_byte() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.set_math_flags_byte(64, false, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
@@ -237,7 +237,7 @@ mod test {
 
     #[test]
     fn test_set_cmp_flags_word() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.set_cmp_flags_word(5, 10, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
@@ -314,7 +314,7 @@ mod test {
 
     #[test]
     fn test_set_math_flags_word() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
         vm.set_math_flags_word(64, false, false);
         assert!(!vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
@@ -363,7 +363,7 @@ mod test {
 
     #[test]
     fn test_default_flags() {
-        let vm = VM::new();
+        let vm = VM::new_test();
         assert!(!vm.check_flag(CARRY));
         assert!(vm.check_flag(ZERO));
         assert!(!vm.check_flag(SIGNED));
@@ -375,7 +375,7 @@ mod test {
 
     #[test]
     fn test_clear_flag() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         assert!(vm.check_flag(ZERO));
         assert!(!vm.check_flag(CARRY));
@@ -389,7 +389,7 @@ mod test {
 
     #[test]
     fn test_set_flag() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         assert!(!vm.check_flag(OVERFLOW));
         assert!(vm.check_flag(ZERO));
@@ -403,7 +403,7 @@ mod test {
 
     #[test]
     fn test_update_flag() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         assert!(!vm.check_flag(GREATER_THAN));
         assert!(!vm.check_flag(LESS_THAN));

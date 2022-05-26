@@ -6,7 +6,7 @@ use maikor_vm_core::VM;
 
 #[test]
 fn test_simple() {
-    let mut vm = VM::new();
+    let mut vm = VM::new_test();
     assert_eq!(vm.pc, 0);
     vm.memory[0] = INC_REG_BYTE;
     vm.memory[1] = id::AL as u8;

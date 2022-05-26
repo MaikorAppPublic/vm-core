@@ -107,7 +107,7 @@ mod test {
 
     #[test]
     fn byte_reg_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         let cost1 = vm.write_byte_reg(&Register::from(id::AL as u8), 0, 10);
         let cost2 = vm.write_byte_reg(&Register::from(id::DH as u8), 0, 19);
@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn byte_ind_reg_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AH] = 1;
         vm.registers[offset::DL] = 50;
@@ -134,7 +134,7 @@ mod test {
 
     #[test]
     fn word_reg_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         let cost1 = vm.write_word_reg(&Register::from(id::BX as u8), 0, 256);
         let cost2 = vm.write_word_reg(&Register::from(id::DX as u8), 0, 12563);
@@ -146,7 +146,7 @@ mod test {
 
     #[test]
     fn word_ind_reg_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AH] = 1;
         vm.registers[offset::DL] = 50;
@@ -161,7 +161,7 @@ mod test {
 
     #[test]
     fn byte_reg_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AH] = 4;
         let (value, cost) = vm.read_byte_reg(&Register::from(id::AH as u8), 0);
@@ -172,7 +172,7 @@ mod test {
 
     #[test]
     fn word_reg_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AH] = 2;
         vm.registers[offset::AL] = 2;
@@ -184,7 +184,7 @@ mod test {
 
     #[test]
     fn byte_ind_reg_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AL] = 4;
         vm.memory[4] = 15;
@@ -196,7 +196,7 @@ mod test {
 
     #[test]
     fn word_ind_reg_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.registers[offset::AH] = 2;
         vm.registers[offset::AL] = 2;

@@ -498,7 +498,9 @@ impl NoiseChannel {
 }
 
 pub struct Sound {
+    //if sound is enabled
     on: bool,
+    //duplicate of sound register memory
     register_data: [u8; 0x17],
     time: u32,
     prev_time: u32,

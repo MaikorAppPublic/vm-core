@@ -1,5 +1,6 @@
 use crate::mem::{address, sizes};
 use crate::register::offset;
+use crate::sound::{AudioPlayer, Sound};
 use maikor_platform::constants::SAVE_COUNT;
 use maikor_platform::mem::address::interrupt;
 use maikor_platform::mem::interrupt_flags;
@@ -10,6 +11,7 @@ mod internals;
 mod mem;
 mod ops;
 mod register;
+mod sound;
 
 pub struct VM {
     /// Order is AH, AL, BH, BL, CH, CL, DH, DL, FLG
@@ -39,11 +41,13 @@ pub struct VM {
     pub cycles_executed: usize,
     /// index in memory where arguments are being read from
     arg_ptr: u16,
+    pub sound: Sound,
 }
 
 impl VM {
-    #[allow(clippy::new_without_default)] //not necessary
-    pub fn new() -> Self {
+    /// Create a new VM
+    /// Requires an AudioPlayer, as an example see maikor-interface
+    pub fn new(player: Box<dyn AudioPlayer>) -> Self {
         let mut registers = [0; registers::SIZE];
         registers[offset::FLAGS] = registers::FLG_DEFAULT;
         let mut memory = [0; sizes::TOTAL];
@@ -66,7 +70,25 @@ impl VM {
             op_executed: 0,
             cycles_executed: 0,
             arg_ptr: 0,
+            sound: Sound::new(player),
         }
+    }
+
+    /// Create an instance with a dummy audio player for testing
+    pub fn new_test() -> VM {
+        struct TestAudio {}
+        impl AudioPlayer for TestAudio {
+            fn play(&mut self, _left_channel: &[f32], _right_channel: &[f32]) {}
+
+            fn samples_rate(&self) -> u32 {
+                44100
+            }
+
+            fn underflowed(&self) -> bool {
+                false
+            }
+        }
+        Self::new(Box::new(TestAudio {}))
     }
 }
 
@@ -78,7 +100,7 @@ impl VM {
 }
 
 impl VM {
-    /// Load game and saves
+    /// Load game
     /// This only copies data to banks, it doesn't reset PC, registers, etc
     /// Call [VM::init()] once before any [VM::step()] calls
     pub fn load_game(&mut self, game: Vec<u8>, saves: &[[u8; sizes::SAVE_BANK]]) {
@@ -96,7 +118,7 @@ impl VM {
         todo!()
     }
 
-    /// Loads initial banks
+    /// Loads initial banks and setup sound
     /// This should be called after `load_game()` and any needed changes are made
     /// Once this has been called the banks and memory shouldn't be changed by the host
     /// (except for setting flags, interrupts, etc)

@@ -227,7 +227,7 @@ mod test {
 
     #[test]
     fn byte_mem_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         let cost1 = vm.write_byte_mem(2, 124);
         let cost2 = vm.write_byte_mem(875, 1);
@@ -240,7 +240,7 @@ mod test {
 
     #[test]
     fn word_mem_write() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         let cost = vm.write_word_mem(875, 10);
 
@@ -251,7 +251,7 @@ mod test {
 
     #[test]
     fn byte_mem_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.memory[12] = 56;
         let (value, cost) = vm.read_byte_mem(12);
@@ -262,7 +262,7 @@ mod test {
 
     #[test]
     fn word_mem_read() {
-        let mut vm = VM::new();
+        let mut vm = VM::new_test();
 
         vm.memory[12] = 1;
         vm.memory[13] = 56;
