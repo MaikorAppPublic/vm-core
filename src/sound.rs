@@ -85,15 +85,17 @@ impl VolumeEnvelope {
     }
 
     fn step(&mut self) {
-        if self.delay > 1 {
-            self.delay -= 1;
-        } else if self.delay == 1 {
-            self.delay = self.period;
-            if self.goes_up && self.volume < 15 {
-                self.volume += 1;
-            } else if !self.goes_up && self.volume > 0 {
-                self.volume -= 1;
+        match self.delay {
+            0 => {}
+            1 => {
+                self.delay = self.period;
+                if self.goes_up && self.volume < 15 {
+                    self.volume += 1;
+                } else if !self.goes_up && self.volume > 0 {
+                    self.volume -= 1;
+                }
             }
+            _ => self.delay -= 1,
         }
     }
 }
@@ -254,12 +256,10 @@ impl SquareChannel {
                 } else {
                     self.sweep_frequency -= offset;
                 }
+            } else if self.sweep_frequency >= 2048 - offset {
+                self.sweep_frequency = 2048;
             } else {
-                if self.sweep_frequency >= 2048 - offset {
-                    self.sweep_frequency = 2048;
-                } else {
-                    self.sweep_frequency += offset;
-                }
+                self.sweep_frequency += offset;
             }
         }
     }
@@ -570,6 +570,7 @@ impl Sound {
             return;
         }
         self.run();
+        #[allow(clippy::manual_range_contains)] //range is 2x slower
         if addr >= S1_S && addr <= C_P {
             self.register_data[addr as usize - SOUND] = value;
         }

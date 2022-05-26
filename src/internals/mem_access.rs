@@ -187,38 +187,45 @@ impl VM {
 }
 
 #[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_code_bank(addr: usize) -> bool {
-    (address::CODE_BANK..(address::CODE_BANK + sizes::CODE_BANK)).contains(&addr)
+    addr >= address::CODE_BANK && addr < address::CODE_BANK + sizes::CODE_BANK
 }
 
 #[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_ram_bank(addr: usize) -> bool {
-    (address::RAM_BANK..(address::RAM_BANK + sizes::RAM_BANK)).contains(&addr)
+    addr >= address::RAM_BANK && addr < address::RAM_BANK + sizes::RAM_BANK
 }
 
 #[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_save_bank(addr: usize) -> bool {
-    (address::SAVE_BANK..(address::SAVE_BANK + sizes::SAVE_BANK)).contains(&addr)
+    addr >= address::SAVE_BANK && addr < address::SAVE_BANK + sizes::SAVE_BANK
 }
 
-#[inline]
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_atlas1_bank(addr: usize) -> bool {
-    (address::ATLAS1..(address::ATLAS1 + sizes::ATLAS)).contains(&addr)
+    addr >= address::ATLAS1 && addr < address::ATLAS1 + sizes::ATLAS
 }
 
-#[inline]
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_atlas2_bank(addr: usize) -> bool {
-    (address::ATLAS2..(address::ATLAS2 + sizes::ATLAS)).contains(&addr)
+    addr >= address::ATLAS2 && addr < address::ATLAS2 + sizes::ATLAS
 }
 
-#[inline]
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_atlas3_bank(addr: usize) -> bool {
-    (address::ATLAS3..(address::ATLAS3 + sizes::ATLAS)).contains(&addr)
+    addr >= address::ATLAS3 && addr < address::ATLAS3 + sizes::ATLAS
 }
 
-#[inline]
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_atlas4_bank(addr: usize) -> bool {
-    (address::ATLAS4..(address::ATLAS4 + sizes::ATLAS)).contains(&addr)
+    addr >= address::ATLAS4 && addr < address::ATLAS4 + sizes::ATLAS
 }
 
 #[cfg(test)]
