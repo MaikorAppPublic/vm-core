@@ -11,12 +11,16 @@ impl VM {
             ops::NOP => (false, 1),
             ops::HALT => {
                 self.halted = true;
-                (false, 1)
+                (true, 1)
             }
             ops::EHALT => {
                 self.halted = true;
                 self.error = Some(String::from("Halted by program"));
-                (false, 1)
+                (true, 1)
+            }
+            ops::RETI => {
+                self.return_from_interrupt();
+                (true, 4)
             }
             ops::INC_REG_BYTE => (false, self.inc_reg_byte()),
             ops::DEC_REG_BYTE => (false, self.dec_reg_byte()),

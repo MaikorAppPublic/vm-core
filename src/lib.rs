@@ -1,7 +1,10 @@
 use crate::mem::{address, sizes};
 use crate::register::offset;
 use maikor_platform::constants::SAVE_COUNT;
+use maikor_platform::mem::address::interrupt;
+use maikor_platform::mem::interrupt_flags;
 use maikor_platform::registers;
+use maikor_platform::registers::flags::INTERRUPTS;
 
 mod internals;
 mod mem;
@@ -183,6 +186,49 @@ impl VM {
             Err(msg) => self.fail(msg),
         }
         0
+    }
+
+    pub fn trigger_interrupt(&mut self, interrupt_id: u8) {
+        if self.check_flag(INTERRUPTS)
+            && self.memory[address::IRQ_CONTROL] & interrupt_id == interrupt_id
+        {
+            let addr = match interrupt_id {
+                interrupt_flags::IRQ_CONTROLLER => interrupt::IRQ_CONTROLLER,
+                interrupt_flags::IRQ_DATETIME => interrupt::IRQ_DATETIME,
+                interrupt_flags::IRQ_INPUT => interrupt::IRQ_INPUT,
+                interrupt_flags::IRQ_LINE_DRAW => interrupt::IRQ_LINE_DRAW,
+                interrupt_flags::IRQ_SCREEN_DRAW => interrupt::IRQ_SCREEN_DRAW,
+                interrupt_flags::IRQ_TIMER => interrupt::IRQ_TIMER,
+                _ => {
+                    self.fail(format!(
+                        "Attempted to trigger invalid interrupt id: {interrupt_id}"
+                    ));
+                    return;
+                }
+            };
+            unsafe {
+                let dst = self.get_memory_mut(address::IRQ_REG_DUMP, 9).as_mut_ptr();
+                let src = self.registers.as_mut_ptr();
+                std::ptr::copy_nonoverlapping(src, dst, 9);
+            }
+            let ret_addr = self.pc.to_be_bytes();
+            self.memory[address::IRQ_REG_ADDR] = ret_addr[0];
+            self.memory[address::IRQ_REG_ADDR + 1] = ret_addr[1];
+            self.clear_flag(INTERRUPTS);
+            self.pc = addr;
+        }
+    }
+
+    fn return_from_interrupt(&mut self) {
+        unsafe {
+            let src = self.get_memory_mut(address::IRQ_REG_DUMP, 9).as_mut_ptr();
+            let dst = self.registers.as_mut_ptr();
+            std::ptr::copy_nonoverlapping(src, dst, 9);
+        }
+        self.pc = u16::from_be_bytes([
+            self.memory[address::IRQ_REG_ADDR],
+            self.memory[address::IRQ_REG_ADDR + 1],
+        ]);
     }
 
     /// Run arbitrary op, does not advance PC automatically (JMP, etc ops still work)
