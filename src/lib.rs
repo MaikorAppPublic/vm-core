@@ -1,6 +1,6 @@
 use crate::mem::{address, sizes};
 use crate::register::offset;
-use crate::sound::{AudioPlayer, Sound};
+use crate::sound::Sound;
 use maikor_platform::constants::SAVE_COUNT;
 use maikor_platform::mem::address::interrupt;
 use maikor_platform::mem::interrupt_flags;
@@ -169,10 +169,10 @@ impl VM {
         len: usize,
         backup_id: Option<u8>,
     ) {
-        if ((id as usize) < len) && backup_id.is_none() {
+        if ((id as usize) >= len) && backup_id.is_none() {
             panic!(
                 "Attempted to load {bank_name} {id} during init, but only {} available",
-                len - 1
+                len
             );
         }
         if len > id as usize {
@@ -328,4 +328,10 @@ impl VM {
             self.write_byte_mem(addr + i as u16, *value);
         }
     }
+}
+
+pub trait AudioPlayer: Send {
+    fn play(&mut self, left_channel: &[f32], right_channel: &[f32]);
+    fn samples_rate(&self) -> u32;
+    fn underflowed(&self) -> bool;
 }

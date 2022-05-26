@@ -1,5 +1,6 @@
 // this whole file was taken from https://github.com/mvdnes/rboy/blob/master/src/sound.rs
 
+use crate::AudioPlayer;
 use blip_buf::BlipBuf;
 use maikor_platform::mem;
 
@@ -42,12 +43,6 @@ const WAVE_TABLE_END: u16 = mem::address::WAVE_TABLE + mem::sizes::WAVE_TABLE;
 
 const SOUND: usize = mem::address::SOUND as usize;
 const WAVE_TABLE: usize = mem::address::WAVE_TABLE as usize;
-
-pub trait AudioPlayer: Send {
-    fn play(&mut self, left_channel: &[f32], right_channel: &[f32]);
-    fn samples_rate(&self) -> u32;
-    fn underflowed(&self) -> bool;
-}
 
 struct VolumeEnvelope {
     period: u8,
@@ -517,6 +512,16 @@ pub struct Sound {
 }
 
 impl Sound {
+    pub fn reset(&mut self) {
+        self.register_data.fill(0);
+        self.time = 0;
+        self.prev_time = 0;
+        self.next_time = 0;
+        self.on = false;
+    }
+}
+
+impl Sound {
     pub fn new(player: Box<dyn AudioPlayer>) -> Sound {
         let blipbuf1 = create_blipbuf(player.samples_rate());
         let blipbuf2 = create_blipbuf(player.samples_rate());
@@ -563,9 +568,11 @@ impl Sound {
         }
     }
 
-    pub fn update(&mut self, addr: u16, value: u8) {
+    /// update sound memory
+    /// returns true if device was switched off and so sound memory should be zeroed
+    pub fn update(&mut self, addr: u16, value: u8) -> bool {
         if addr != C_P && !self.on {
-            return;
+            return false;
         }
         self.run();
         #[allow(clippy::manual_range_contains)] //range is 2x slower
@@ -581,10 +588,20 @@ impl Sound {
                 self.volume_left = value & 0x7;
                 self.volume_right = (value >> 4) & 0x7;
             }
-            C_P => self.on = value & 0x80 == 0x80,
+            C_P => {
+                self.on = value & 0x80 == 0x80;
+                if !self.on {
+                    self.time = 0;
+                    self.prev_time = 0;
+                    self.next_time = 0;
+                    self.register_data.fill(0);
+                    return true;
+                }
+            }
             WAVE_TABLE_START..=WAVE_TABLE_END => self.channel3.update(addr, value),
             _ => (),
         }
+        false
     }
 
     pub fn do_cycle(&mut self, cycles: u32) {

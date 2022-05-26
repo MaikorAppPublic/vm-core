@@ -6,6 +6,7 @@ pub mod sizes {
     pub const CODE: usize = sizes::CODE as usize;
     pub const RAM: usize = sizes::RAM as usize;
     pub const SOUND: usize = sizes::SOUND as usize;
+    pub const WAVE_TABLE: usize = sizes::WAVE_TABLE as usize;
     pub const INPUT: usize = sizes::INPUT as usize;
     pub const CODE_BANK_ID: usize = sizes::CODE_BANK_ID as usize;
     pub const RAM_BANK_ID: usize = sizes::RAM_BANK_ID as usize;
@@ -35,6 +36,7 @@ pub mod address {
     pub const RAM_BANK: usize = address::RAM_BANK as usize;
     pub const INPUT: usize = address::INPUT as usize;
     pub const SOUND: usize = address::SOUND as usize;
+    pub const WAVE_TABLE: usize = address::WAVE_TABLE as usize;
     pub const SAVE_BANK_ID: usize = address::SAVE_BANK_ID as usize;
     pub const SAVE_BANK: usize = address::SAVE_BANK as usize;
     pub const ATLAS1: usize = address::ATLAS1 as usize;

@@ -29,14 +29,24 @@ impl VM {
     }
 
     pub fn write_byte_mem(&mut self, addr: u16, value: u8) -> usize {
-        let addr = addr as usize;
-        self.memory[addr] = value;
-        let bank_update_cost = self.write_mem_change_to_bank(addr, value);
-        let bank_load_cost = if is_special_memory(addr as u16) {
-            self.load_banks(addr, value as usize)
+        let addr_idx = addr as usize;
+        self.memory[addr_idx] = value;
+        let bank_update_cost = self.write_mem_change_to_bank(addr_idx, value);
+        let bank_load_cost = if is_special_memory(addr) {
+            self.load_banks(addr_idx, value as usize)
         } else {
             0
         };
+        if (addr_idx >= address::SOUND && addr_idx <= address::SOUND + sizes::SOUND)
+            || (addr_idx >= address::WAVE_TABLE
+                && addr_idx <= address::WAVE_TABLE + sizes::WAVE_TABLE)
+        {
+            if self.sound.update(addr, value) {
+                self.memory[address::SOUND..address::SOUND + sizes::SOUND]
+                    .as_mut()
+                    .fill(0);
+            }
+        }
         1 + bank_load_cost + bank_update_cost
     }
 
