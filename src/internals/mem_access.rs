@@ -37,15 +37,15 @@ impl VM {
         } else {
             0
         };
-        if (addr_idx >= address::SOUND && addr_idx <= address::SOUND + sizes::SOUND)
+        #[allow(clippy::manual_range_contains)] //range is 2x slower
+        if ((addr_idx >= address::SOUND && addr_idx <= address::SOUND + sizes::SOUND)
             || (addr_idx >= address::WAVE_TABLE
-                && addr_idx <= address::WAVE_TABLE + sizes::WAVE_TABLE)
+                && addr_idx <= address::WAVE_TABLE + sizes::WAVE_TABLE))
+            && self.sound.update(addr, value)
         {
-            if self.sound.update(addr, value) {
-                self.memory[address::SOUND..address::SOUND + sizes::SOUND]
-                    .as_mut()
-                    .fill(0);
-            }
+            self.memory[address::SOUND..address::SOUND + sizes::SOUND]
+                .as_mut()
+                .fill(0);
         }
         1 + bank_load_cost + bank_update_cost
     }
