@@ -1,5 +1,11 @@
 ## Pre-alpha
 
+### 0.1.9
+- Add support for sound
+- Add support for interrupts
+- Update dependencies
+  - Language to 0.1.22
+
 ### 0.1.8
 - *BREAKING CHANGE*
 - Fix bug with atlas bank swapping
