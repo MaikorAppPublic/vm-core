@@ -12,8 +12,9 @@ keywords = ["game","gamedev","2d","vm"]
 categories = ["games"]
 
 [dependencies]
-maikor-platform = "0.1.21"
+maikor-platform = "0.1.22"
 log = "0.4.17"
+blip_buf = "0.1.4"
 
 [dev-dependencies]
 lazy_static = "1.4.0"
