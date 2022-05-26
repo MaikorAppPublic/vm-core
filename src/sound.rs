@@ -513,7 +513,6 @@ pub struct Sound {
     channel4: NoiseChannel,
     volume_left: u8,
     volume_right: u8,
-    need_sync: bool,
     player: Box<dyn AudioPlayer>,
 }
 
@@ -541,7 +540,6 @@ impl Sound {
             channel4: NoiseChannel::new(blipbuf4),
             volume_left: 7,
             volume_right: 7,
-            need_sync: false,
             player,
         }
     }
@@ -601,10 +599,6 @@ impl Sound {
         }
     }
 
-    pub fn sync(&mut self) {
-        self.need_sync = true;
-    }
-
     fn do_output(&mut self) {
         self.run();
         debug_assert!(self.time == self.prev_time);
@@ -616,8 +610,7 @@ impl Sound {
         self.time = 0;
         self.prev_time = 0;
 
-        if !self.need_sync || self.player.underflowed() {
-            self.need_sync = false;
+        if self.player.underflowed() {
             self.mix_buffers();
         } else {
             // Prevent the BlipBuf's from filling up and triggering an assertion
