@@ -2,8 +2,8 @@ use crate::VM;
 
 impl VM {
     pub fn swap_byte(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
         let (src_offset, offset_cost2) = self.pre_process(&src);
         if !dst.is_indirect && !src.is_indirect {
@@ -22,8 +22,8 @@ impl VM {
     }
 
     pub fn swap_word(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
         let (src_offset, offset_cost2) = self.pre_process(&src);
         if !dst.is_indirect && !src.is_indirect {

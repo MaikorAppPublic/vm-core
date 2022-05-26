@@ -3,7 +3,7 @@ use maikor_platform::registers::flags::{GREATER_THAN, LESS_THAN};
 
 impl VM {
     fn jmp_addr_conditional(&mut self, jump: bool) -> (bool, usize) {
-        let addr = self.word();
+        let addr = self.read_arg_word();
         if jump {
             self.pc = addr;
             (true, 0)
@@ -13,7 +13,7 @@ impl VM {
     }
 
     fn jmp_reg_conditional(&mut self, jump: bool) -> (bool, usize) {
-        let dst = self.register();
+        let dst = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (addr, read_cost) = self.read_word_reg(&dst, offset);
         let result = if jump {

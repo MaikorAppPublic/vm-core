@@ -8,13 +8,13 @@ impl VM {
     pub fn pre_process(&mut self, reg: &Register) -> (i16, usize) {
         self.process_arg(reg, false);
         if reg.is_offset_num {
-            (self.word() as i16, 0)
+            (self.read_arg_word() as i16, 0)
         } else if reg.is_offset_reg {
-            let offset_reg = self.register();
+            let offset_reg = self.read_arg_register();
             let (num, cost) = self.read_byte_reg_value(&offset_reg);
             (num as i16, cost)
         } else if reg.is_offset_ext_reg {
-            let offset_reg = self.register();
+            let offset_reg = self.read_arg_register();
             let (num, cost) = self.read_word_reg_value(&offset_reg);
             (num as i16, cost)
         } else {

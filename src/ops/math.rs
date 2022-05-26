@@ -3,8 +3,8 @@ use crate::VM;
 
 impl VM {
     pub fn math_reg_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.register();
-        let src = self.byte();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_byte();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (dst_value, read_cost) = self.read_byte_reg(&dst, offset);
         let (result, carried) = method(dst_value, src);
@@ -15,8 +15,8 @@ impl VM {
     }
 
     pub fn math_reg_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
         let (src_offset, offset_cost2) = self.pre_process(&src);
         let (dst_value, read_cost1) = self.read_byte_reg(&dst, dst_offset);
@@ -30,8 +30,8 @@ impl VM {
     }
 
     pub fn math_addr_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.word();
-        let src = self.byte();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_byte();
         let (dst_value, read_cost) = self.read_byte_mem(dst);
         let (result, carried) = method(dst_value, src);
         let write_cost = self.write_byte_mem(dst, result);
@@ -40,8 +40,8 @@ impl VM {
     }
 
     pub fn math_addr_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.word();
-        let src = self.register();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
         let (dst_value, read_cost1) = self.read_byte_mem(dst);
         let (src_value, read_cost2) = self.read_byte_reg(&src, offset);
@@ -53,8 +53,8 @@ impl VM {
     }
 
     pub fn math_addr_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         let (dst_value, read_cost1) = self.read_byte_mem(dst);
         let (src_value, read_cost2) = self.read_byte_mem(src);
         let (result, carried) = method(dst_value, src_value);
@@ -64,8 +64,8 @@ impl VM {
     }
 
     pub fn math_reg_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (dst_value, read_cost1) = self.read_byte_reg(&dst, offset);
         let (src_value, read_cost2) = self.read_byte_mem(src);
@@ -77,8 +77,8 @@ impl VM {
     }
 
     pub fn math_reg_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (dst_value, read_cost) = self.read_word_reg(&dst, offset);
         let (result, carried) = method(dst_value, src);
@@ -89,8 +89,8 @@ impl VM {
     }
 
     pub fn math_reg_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
         let (src_offset, offset_cost2) = self.pre_process(&src);
         let (dst_value, read_cost1) = self.read_word_reg(&dst, dst_offset);
@@ -104,8 +104,8 @@ impl VM {
     }
 
     pub fn math_addr_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         let (dst_value, read_cost) = self.read_word_mem(dst);
         let (result, carried) = method(dst_value, src);
         let write_cost = self.write_word_mem(dst, result);
@@ -114,8 +114,8 @@ impl VM {
     }
 
     pub fn math_addr_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.word();
-        let src = self.register();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
         let (dst_value, read_cost1) = self.read_word_mem(dst);
         let (src_value, read_cost2) = self.read_word_reg(&src, offset);
@@ -127,8 +127,8 @@ impl VM {
     }
 
     pub fn math_addr_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         let (dst_value, read_cost1) = self.read_word_mem(dst);
         let (src_value, read_cost2) = self.read_word_mem(src);
         let (result, carried) = method(dst_value, src_value);
@@ -138,8 +138,8 @@ impl VM {
     }
 
     pub fn math_reg_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (dst_value, read_cost1) = self.read_word_reg(&dst, offset);
         let (src_value, read_cost2) = self.read_word_mem(src);

@@ -2,8 +2,8 @@ use crate::VM;
 
 impl VM {
     pub fn cpy_reg_num_byte(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.byte();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_byte();
         let (offset, offset_cost) = self.pre_process(&dst);
         let write_cost = self.write_byte_reg(&dst, offset, src);
         self.post_process(&dst);
@@ -11,8 +11,8 @@ impl VM {
     }
 
     pub fn cpy_reg_reg_byte(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst);
         let (src_offset, src_offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_byte_reg(&src, src_offset);
@@ -22,8 +22,8 @@ impl VM {
     }
 
     pub fn cpy_reg_addr_byte(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (src_value, read_cost) = self.read_byte_mem(src);
         let write_cost = self.write_byte_reg(&dst, offset, src_value);
@@ -32,8 +32,8 @@ impl VM {
     }
 
     pub fn cpy_reg_num_word(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let write_cost = self.write_word_reg(&dst, offset, src);
         self.post_process(&dst);
@@ -41,8 +41,8 @@ impl VM {
     }
 
     pub fn cpy_reg_reg_word(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.register();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_register();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst);
         let (src_offset, src_offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_word_reg(&src, src_offset);
@@ -52,8 +52,8 @@ impl VM {
     }
 
     pub fn cpy_reg_addr_word(&mut self) -> usize {
-        let dst = self.register();
-        let src = self.word();
+        let dst = self.read_arg_register();
+        let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let (src_value, read_cost) = self.read_word_mem(src);
         let write_cost = self.write_word_reg(&dst, offset, src_value);
@@ -62,22 +62,22 @@ impl VM {
     }
 
     pub fn cpy_addr_num_byte(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.byte();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_byte();
         self.write_byte_mem(dst, src)
     }
 
     pub fn cpy_addr_addr_byte(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         let (src_value, read_cost) = self.read_byte_mem(src);
         let write_cost = self.write_byte_mem(dst, src_value);
         write_cost + read_cost
     }
 
     pub fn cpy_addr_reg_byte(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.register();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_byte_reg(&src, offset);
         let write_cost = self.write_byte_mem(dst, src_value);
@@ -86,22 +86,22 @@ impl VM {
     }
 
     pub fn cpy_addr_num_word(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         self.write_word_mem(dst, src)
     }
 
     pub fn cpy_addr_addr_word(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.word();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_word();
         let (src_value, read_cost) = self.read_word_mem(src);
         let write_cost = self.write_word_mem(dst, src_value);
         write_cost + read_cost
     }
 
     pub fn cpy_addr_reg_word(&mut self) -> usize {
-        let dst = self.word();
-        let src = self.register();
+        let dst = self.read_arg_word();
+        let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_word_reg(&src, offset);
         let write_cost = self.write_word_mem(dst, src_value);

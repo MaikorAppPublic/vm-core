@@ -2,8 +2,8 @@ use crate::VM;
 
 impl VM {
     pub fn cmp_reg_num_byte(&mut self, signed: bool) -> usize {
-        let lhs = self.register();
-        let rhs = self.byte();
+        let lhs = self.read_arg_register();
+        let rhs = self.read_arg_byte();
         let (offset, offset_cost) = self.pre_process(&lhs);
         let (lhs_value, read_value) = self.read_byte_reg(&lhs, offset);
         self.set_cmp_flags_byte(lhs_value, rhs, signed);
@@ -12,8 +12,8 @@ impl VM {
     }
 
     pub fn cmp_reg_num_word(&mut self, signed: bool) -> usize {
-        let lhs = self.register();
-        let rhs = self.word();
+        let lhs = self.read_arg_register();
+        let rhs = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&lhs);
         let (lhs_value, read_value) = self.read_word_reg(&lhs, offset);
         self.set_cmp_flags_word(lhs_value, rhs, signed);

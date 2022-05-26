@@ -19,11 +19,11 @@ impl VM {
     }
 
     #[inline(always)]
-    fn byte(&mut self) -> u8 {
+    fn read_arg_byte(&mut self) -> u8 {
         self.next_byte()
     }
 
-    fn word(&mut self) -> u16 {
+    fn read_arg_word(&mut self) -> u16 {
         let mut value = self.next_byte() as u16;
         value <<= 8;
         value += self.next_byte() as u16;
@@ -31,7 +31,7 @@ impl VM {
     }
 
     #[inline(always)]
-    fn register(&mut self) -> Register {
+    fn read_arg_register(&mut self) -> Register {
         Register::from(self.next_byte())
     }
 }

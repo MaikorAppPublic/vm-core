@@ -2,7 +2,7 @@ use crate::VM;
 
 impl VM {
     pub fn inc_reg_byte(&mut self) -> usize {
-        let reg = self.register();
+        let reg = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&reg);
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
@@ -12,7 +12,7 @@ impl VM {
     }
 
     pub fn dec_reg_byte(&mut self) -> usize {
-        let reg = self.register();
+        let reg = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&reg);
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
@@ -22,7 +22,7 @@ impl VM {
     }
 
     pub fn inc_reg_word(&mut self) -> usize {
-        let reg = self.register();
+        let reg = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&reg);
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
@@ -32,7 +32,7 @@ impl VM {
     }
 
     pub fn dec_reg_word(&mut self) -> usize {
-        let reg = self.register();
+        let reg = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&reg);
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
@@ -42,28 +42,28 @@ impl VM {
     }
 
     pub fn inc_addr_byte(&mut self) -> usize {
-        let addr = self.word();
+        let addr = self.read_arg_word();
         let (value, cost) = self.read_byte_mem(addr);
         let (value, _) = value.overflowing_add(1);
         self.write_byte_mem(addr, value) + cost
     }
 
     pub fn dec_addr_byte(&mut self) -> usize {
-        let addr = self.word();
+        let addr = self.read_arg_word();
         let (value, cost) = self.read_byte_mem(addr);
         let (value, _) = value.overflowing_sub(1);
         self.write_byte_mem(addr, value) + cost
     }
 
     pub fn inc_addr_word(&mut self) -> usize {
-        let addr = self.word();
+        let addr = self.read_arg_word();
         let (value, cost) = self.read_word_mem(addr);
         let (value, _) = value.overflowing_add(1);
         self.write_word_mem(addr, value) + cost
     }
 
     pub fn dec_addr_word(&mut self) -> usize {
-        let addr = self.word();
+        let addr = self.read_arg_word();
         let (value, cost) = self.read_word_mem(addr);
         let (value, _) = value.overflowing_sub(1);
         self.write_word_mem(addr, value) + cost
