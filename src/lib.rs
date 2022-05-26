@@ -16,6 +16,7 @@ pub struct VM {
     /// Extended registers (AX, BX, etc) are made of H+L, i.e.
     /// AX is \[AH,AL]
     pub registers: [u8; registers::SIZE],
+    /// Program Counter, address/index of byte currently being executed
     pub pc: u16,
     /// All changes MUST go through debug_set_mem or debug_set_mem_range
     /// otherwise banks won't change, etc
@@ -28,6 +29,7 @@ pub struct VM {
     /// `memory[SAVE_CONTROL]` should set to 0)
     pub save_dirty_flag: [bool; SAVE_COUNT],
     pub atlas_banks: Vec<[u8; sizes::ATLAS]>,
+    /// error message from EHALT
     pub error: Option<String>,
     /// if true the VM has stopped (EoF or error) and can't continue
     pub halted: bool,
@@ -188,6 +190,8 @@ impl VM {
         0
     }
 
+    /// Attempt to trigger the interrupt that matches `interrupt_id`
+    /// VM will halt if the id is invalid
     pub fn trigger_interrupt(&mut self, interrupt_id: u8) {
         if self.check_flag(INTERRUPTS)
             && self.memory[address::IRQ_CONTROL] & interrupt_id == interrupt_id
