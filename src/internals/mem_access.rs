@@ -5,6 +5,7 @@ use maikor_platform::mem::address::is_special_memory;
 impl VM {
     /// Get number in memory at address
     /// Returns the value and cycles used
+    #[must_use]
     pub fn read_word_mem(&self, addr: u16) -> (u16, usize) {
         let mut value = self.memory[addr as usize] as u16;
         value <<= 8;
@@ -12,6 +13,7 @@ impl VM {
         (value, 2)
     }
 
+    #[must_use]
     pub fn write_word_mem(&mut self, addr: u16, value: u16) -> usize {
         let cost1 = self.write_byte_mem(addr, ((value >> 8) & 0xFF) as u8);
         let cost2 = self.write_byte_mem(addr + 1, (value & 0xFF) as u8);
@@ -24,10 +26,12 @@ impl VM {
     /// Get number in memory at address
     /// Returns the value and cycles used
     #[inline(always)]
+    #[must_use]
     pub fn read_byte_mem(&self, addr: u16) -> (u8, usize) {
         (self.memory[addr as usize], 1)
     }
 
+    #[must_use]
     pub fn write_byte_mem(&mut self, addr: u16, value: u8) -> usize {
         let addr_idx = addr as usize;
         self.memory[addr_idx] = value;
@@ -58,6 +62,7 @@ impl VM {
         }
     }
 
+    #[must_use]
     fn load_banks(&mut self, addr: usize, value: usize) -> usize {
         match addr {
             address::CODE_BANK_ID => {

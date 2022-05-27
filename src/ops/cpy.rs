@@ -6,8 +6,7 @@ impl VM {
         let src = self.read_arg_byte();
         let (offset, offset_cost) = self.pre_process(&dst);
         let write_cost = self.write_byte_reg(&dst, offset, src);
-        self.post_process(&dst);
-        offset_cost + write_cost
+        offset_cost + write_cost + self.post_process(&dst)
     }
 
     pub fn cpy_reg_reg_byte(&mut self) -> usize {
@@ -17,8 +16,7 @@ impl VM {
         let (src_offset, src_offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_byte_reg(&src, src_offset);
         let write_cost = self.write_byte_reg(&dst, dst_offset, src_value);
-        self.post_process(&dst);
-        dst_offset_cost + write_cost + src_offset_cost + read_cost
+        dst_offset_cost + write_cost + src_offset_cost + read_cost + self.post_process(&dst)
     }
 
     pub fn cpy_reg_addr_byte(&mut self) -> usize {
@@ -27,8 +25,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&dst);
         let (src_value, read_cost) = self.read_byte_mem(src);
         let write_cost = self.write_byte_reg(&dst, offset, src_value);
-        self.post_process(&dst);
-        offset_cost + write_cost + read_cost
+        offset_cost + write_cost + read_cost + self.post_process(&dst)
     }
 
     pub fn cpy_reg_num_word(&mut self) -> usize {
@@ -36,8 +33,7 @@ impl VM {
         let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
         let write_cost = self.write_word_reg(&dst, offset, src);
-        self.post_process(&dst);
-        offset_cost + write_cost
+        offset_cost + write_cost + self.post_process(&dst)
     }
 
     pub fn cpy_reg_reg_word(&mut self) -> usize {
@@ -47,8 +43,7 @@ impl VM {
         let (src_offset, src_offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_word_reg(&src, src_offset);
         let write_cost = self.write_word_reg(&dst, dst_offset, src_value);
-        self.post_process(&dst);
-        dst_offset_cost + write_cost + src_offset_cost + read_cost
+        dst_offset_cost + write_cost + src_offset_cost + read_cost + self.post_process(&dst)
     }
 
     pub fn cpy_reg_addr_word(&mut self) -> usize {
@@ -57,8 +52,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&dst);
         let (src_value, read_cost) = self.read_word_mem(src);
         let write_cost = self.write_word_reg(&dst, offset, src_value);
-        self.post_process(&dst);
-        offset_cost + write_cost + read_cost
+        offset_cost + write_cost + read_cost + self.post_process(&dst)
     }
 
     pub fn cpy_addr_num_byte(&mut self) -> usize {
@@ -81,8 +75,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_byte_reg(&src, offset);
         let write_cost = self.write_byte_mem(dst, src_value);
-        self.post_process(&src);
-        write_cost + read_cost + offset_cost
+        write_cost + read_cost + offset_cost + self.post_process(&src)
     }
 
     pub fn cpy_addr_num_word(&mut self) -> usize {
@@ -105,8 +98,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&src);
         let (src_value, read_cost) = self.read_word_reg(&src, offset);
         let write_cost = self.write_word_mem(dst, src_value);
-        self.post_process(&src);
-        write_cost + offset_cost + read_cost
+        write_cost + offset_cost + read_cost + self.post_process(&src)
     }
 }
 
@@ -144,7 +136,7 @@ mod test {
         );
         check_cycles(
             &[id::AX as u8 | IND_PRE_DEC, 10, 1],
-            6,
+            8,
             VM::cpy_reg_addr_word,
         );
     }

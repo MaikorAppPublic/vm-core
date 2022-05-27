@@ -1,14 +1,20 @@
 use crate::register::Register;
 use crate::VM;
 
+mod bitlogic;
 mod cmp;
 mod cpy;
 pub mod execute_command;
+mod flags;
 mod inc_dec;
 mod jump;
 mod math;
+mod mathc;
+mod maths;
+mod mem;
 mod misc;
 mod ppid;
+mod stack;
 
 // Argument reading
 impl VM {

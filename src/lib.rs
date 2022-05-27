@@ -54,8 +54,6 @@ impl VM {
         let stack = (address::STACK as u16).to_be_bytes();
         memory[address::SP] = stack[0];
         memory[address::SP + 1] = stack[1];
-        memory[address::FP] = stack[0];
-        memory[address::FP + 1] = stack[1];
         Self {
             registers,
             pc: 0,
@@ -161,6 +159,7 @@ impl VM {
         );
     }
 
+    #[allow(unused_must_use)]
     fn init_bank(
         &mut self,
         bank_name: &str,
@@ -313,6 +312,7 @@ impl VM {
     }
 }
 
+#[allow(unused_must_use)]
 impl VM {
     /// Set one byte in memory
     /// This will trigger interrupts, bank switching, etc

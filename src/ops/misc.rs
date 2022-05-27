@@ -8,17 +8,20 @@ impl VM {
         let (src_offset, offset_cost2) = self.pre_process(&src);
         if !dst.is_indirect && !src.is_indirect {
             self.registers.swap(dst.addr, src.addr);
-            self.post_process(&dst);
-            self.post_process(&src);
-            return 1;
+            return self.post_process(&dst) + self.post_process(&src) + 1;
         }
         let (lhs, cost1) = self.read_byte_reg(&dst, dst_offset);
         let (rhs, cost2) = self.read_byte_reg(&src, src_offset);
         let cost3 = self.write_byte_reg(&dst, dst_offset, rhs);
         let cost4 = self.write_byte_reg(&src, src_offset, lhs);
-        self.post_process(&dst);
-        self.post_process(&src);
-        cost1 + cost2 + cost3 + cost4 + offset_cost1 + offset_cost2
+        self.post_process(&dst)
+            + self.post_process(&src)
+            + cost1
+            + cost2
+            + cost3
+            + cost4
+            + offset_cost1
+            + offset_cost2
     }
 
     pub fn swap_word(&mut self) -> usize {
@@ -29,17 +32,20 @@ impl VM {
         if !dst.is_indirect && !src.is_indirect {
             self.registers.swap(dst.addr, src.addr);
             self.registers.swap(dst.addr + 1, src.addr + 1);
-            self.post_process(&dst);
-            self.post_process(&src);
-            return 1;
+            return self.post_process(&dst) + self.post_process(&src) + 1;
         }
         let (lhs, cost1) = self.read_word_reg(&dst, dst_offset);
         let (rhs, cost2) = self.read_word_reg(&src, src_offset);
         let cost3 = self.write_word_reg(&dst, dst_offset, rhs);
         let cost4 = self.write_word_reg(&src, src_offset, lhs);
-        self.post_process(&dst);
-        self.post_process(&src);
-        cost1 + cost2 + cost3 + cost4 + offset_cost1 + offset_cost2
+        self.post_process(&dst)
+            + self.post_process(&src)
+            + cost1
+            + cost2
+            + cost3
+            + cost4
+            + offset_cost1
+            + offset_cost2
     }
 }
 

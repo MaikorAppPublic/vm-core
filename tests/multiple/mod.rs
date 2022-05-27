@@ -1,5 +1,8 @@
 use crate::{compare_memory, compare_registers};
-use maikor_platform::ops::{CPY_ADDR_REG_WORD, CPY_REG_REG_BYTE, INC_REG_BYTE};
+use maikor_platform::ops::{
+    ADD_REG_NUM_BYTE, CPY_ADDR_REG_WORD, CPY_REG_REG_BYTE, HALT, INC_REG_BYTE, JBC_ADDR_NUM,
+    JBS_ADDR_NUM, JMP_ADDR, SWAP_REG_REG_BYTE,
+};
 use maikor_platform::registers::flags::*;
 use maikor_platform::registers::id;
 use maikor_vm_core::VM;
@@ -7,30 +10,47 @@ use maikor_vm_core::VM;
 #[test]
 fn test_simple() {
     let mut vm = VM::new_test();
-    assert_eq!(vm.pc, 0);
-    vm.memory[0] = INC_REG_BYTE;
-    vm.memory[1] = id::AL as u8;
-    vm.memory[2] = INC_REG_BYTE;
-    vm.memory[3] = id::AH as u8;
-    vm.memory[4] = CPY_REG_REG_BYTE;
-    vm.memory[5] = id::BH as u8;
-    vm.memory[6] = id::AH as u8;
-    vm.memory[7] = CPY_ADDR_REG_WORD;
-    vm.memory[8] = 1;
-    vm.memory[9] = 0;
-    vm.memory[10] = id::BX as u8;
+    #[rustfmt::skip]
+    vm.debug_set_mem_range(0, &[
+        INC_REG_BYTE, id::AL,
+        INC_REG_BYTE, id::AH,
+        CPY_REG_REG_BYTE, id::BH,id::AH,
+        CPY_ADDR_REG_WORD,  1, 0, id::BX,
+        ADD_REG_NUM_BYTE, id::CL, 1,
+        ADD_REG_NUM_BYTE, id::CL, 1,
+        SWAP_REG_REG_BYTE, id::CH, id::CL,
+        HALT,
+    ]);
     let mut mem = vm.memory;
     mem[256] = 1;
-    vm.step();
-    vm.step();
-    vm.step();
-    vm.step();
-    assert!(!vm.halted);
-    assert_eq!(vm.pc, 11);
+    while !vm.halted {
+        vm.step();
+    }
+    assert!(vm.error.is_none());
+    assert_eq!(vm.pc, 20);
     compare_registers(
         "multiple::test_simple",
-        &[1, 1, 1, 0, 0, 0, 0, 0, ZERO | INTERRUPTS],
+        &[1, 1, 1, 0, 2, 0, 0, 0, INTERRUPTS],
         &vm.registers,
     );
     compare_memory("multiple::test_simple", &mem, &vm.memory);
+}
+
+#[test]
+#[rustfmt::skip]
+fn test_jumping() {
+    let mut vm = VM::new_test();
+    vm.debug_set_mem_range(0, &[
+       JMP_ADDR, 3, 232
+    ]);
+    vm.debug_set_mem_range(1000, &[
+        JBC_ADDR_NUM, 0, 50, INTERRUPTS,
+        JBS_ADDR_NUM, 0, 30, INTERRUPTS,
+    ]);
+    // while !vm.halted {
+    vm.step();
+    vm.step();
+    vm.step();
+    // }
+    assert_eq!(vm.pc, 30)
 }

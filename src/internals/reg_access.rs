@@ -5,6 +5,7 @@ use crate::VM;
 impl VM {
     /// Get number in word reg, ignoring any addressing
     /// Returns the value and cycles used
+    #[must_use]
     pub fn read_word_reg_value(&mut self, reg: &Register) -> (u16, usize) {
         let mut value = self.registers[reg.addr] as u16;
         value <<= 8;
@@ -14,6 +15,7 @@ impl VM {
 
     /// Write number in word reg, ignoring any addressing
     /// Returns the cycles used
+    #[must_use]
     pub fn write_word_reg_value(&mut self, reg: &Register, value: u16) -> usize {
         self.registers[reg.addr] = ((value >> 8) & 0xFF) as u8;
         self.registers[reg.addr + 1] = (value & 0xFF) as u8;
@@ -24,6 +26,7 @@ impl VM {
     ///   if direct, the value in the reg
     ///   if indirect, the value in memory at the address in the reg
     /// Returns the value and cycles used
+    #[must_use]
     pub fn read_word_reg(&mut self, reg: &Register, offset: i16) -> (u16, usize) {
         let value = self.read_word_reg_value(reg);
         if reg.is_indirect {
@@ -38,6 +41,7 @@ impl VM {
     ///   if direct, the value in the reg
     ///   if indirect, the value in memory at the address in the reg
     /// Returns the cycles used
+    #[must_use]
     pub fn write_word_reg(&mut self, reg: &Register, offset: i16, value: u16) -> usize {
         if reg.is_indirect {
             let (addr, cost) = self.read_word_reg_value(reg);
@@ -53,12 +57,14 @@ impl VM {
 impl VM {
     /// Get number in word reg, ignoring any addressing
     /// Returns the value and cycles used
+    #[must_use]
     pub fn read_byte_reg_value(&mut self, reg: &Register) -> (u8, usize) {
         (self.registers[reg.addr], 1)
     }
 
     /// Write number in word reg, ignoring any addressing
     /// Returns the cycles used
+    #[must_use]
     pub fn write_byte_reg_value(&mut self, reg: &Register, value: u8) -> usize {
         self.registers[reg.addr] = value;
         1
@@ -68,6 +74,7 @@ impl VM {
     ///   if direct, the value in the reg
     ///   if indirect, the value in memory at the address in the reg
     /// Returns the value and cycles used
+    #[must_use]
     pub fn read_byte_reg(&mut self, reg: &Register, offset: i16) -> (u8, usize) {
         if reg.is_indirect {
             let addr = self.read_word_reg_value(reg);
@@ -82,6 +89,7 @@ impl VM {
     ///   if direct, the value in the reg
     ///   if indirect, the value in memory at the address in the reg
     /// Returns the cycles used
+    #[must_use]
     pub fn write_byte_reg(&mut self, reg: &Register, offset: i16, value: u8) -> usize {
         if reg.is_indirect {
             let (addr, cost) = self.read_word_reg_value(reg);

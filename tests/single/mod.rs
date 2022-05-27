@@ -2,8 +2,8 @@ use crate::{compare_memory, compare_registers};
 use maikor_vm_core::VM;
 
 mod add;
+mod addc;
 mod inc;
-// mod mcpy;
 mod jmp;
 mod mul;
 mod sub;

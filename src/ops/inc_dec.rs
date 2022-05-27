@@ -7,8 +7,7 @@ impl VM {
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
         let final_cost = self.write_byte_reg(&reg, offset, value) + cost;
-        self.post_process(&reg);
-        final_cost + offset_cost
+        final_cost + offset_cost + self.post_process(&reg)
     }
 
     pub fn dec_reg_byte(&mut self) -> usize {
@@ -17,8 +16,7 @@ impl VM {
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
         let final_cost = self.write_byte_reg(&reg, offset, value) + cost;
-        self.post_process(&reg);
-        final_cost + offset_cost
+        final_cost + offset_cost + self.post_process(&reg)
     }
 
     pub fn inc_reg_word(&mut self) -> usize {
@@ -27,8 +25,7 @@ impl VM {
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
         let final_cost = self.write_word_reg(&reg, offset, value) + cost;
-        self.post_process(&reg);
-        final_cost + offset_cost
+        final_cost + offset_cost + self.post_process(&reg)
     }
 
     pub fn dec_reg_word(&mut self) -> usize {
@@ -37,8 +34,7 @@ impl VM {
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
         let final_cost = self.write_word_reg(&reg, offset, value) + cost;
-        self.post_process(&reg);
-        final_cost + offset_cost
+        final_cost + offset_cost + self.post_process(&reg)
     }
 
     pub fn inc_addr_byte(&mut self) -> usize {
@@ -84,7 +80,7 @@ mod test {
         check_cycles(&[id::AX as u8 | INDIRECT], 6, VM::inc_reg_byte);
         check_cycles(&[id::AX as u8 | IND_OFFSET_NUM], 6, VM::inc_reg_byte);
         check_cycles(&[id::AX as u8 | INDIRECT], 8, VM::inc_reg_word);
-        check_cycles(&[id::AX as u8 | IND_PRE_DEC], 8, VM::inc_reg_word);
+        check_cycles(&[id::AX as u8 | IND_PRE_DEC], 10, VM::inc_reg_word);
         check_cycles(&[id::AL as u8], 2, VM::dec_reg_byte);
         check_cycles(&[id::AX as u8], 4, VM::dec_reg_word);
         check_cycles(&[id::AX as u8 | INDIRECT], 6, VM::dec_reg_byte);

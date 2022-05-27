@@ -2,7 +2,7 @@ use crate::internals::flags::{has_overflowed_byte, has_overflowed_word};
 use crate::VM;
 
 impl VM {
-    pub fn math_reg_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_reg_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_byte();
         let (offset, offset_cost) = self.pre_process(&dst);
@@ -13,7 +13,7 @@ impl VM {
         self.post_process(&dst) + read_cost + write_cost + offset_cost
     }
 
-    pub fn math_reg_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_reg_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
@@ -32,7 +32,7 @@ impl VM {
             + offset_cost2
     }
 
-    pub fn math_addr_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_addr_num_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_byte();
         let (dst_value, read_cost) = self.read_byte_mem(dst);
@@ -42,7 +42,7 @@ impl VM {
         read_cost + write_cost
     }
 
-    pub fn math_addr_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_addr_reg_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
@@ -54,7 +54,7 @@ impl VM {
         self.post_process(&src) + read_cost1 + read_cost2 + offset_cost + write_cost
     }
 
-    pub fn math_addr_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_addr_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_word();
         let (dst_value, read_cost1) = self.read_byte_mem(dst);
@@ -65,7 +65,7 @@ impl VM {
         read_cost1 + read_cost2 + write_cost
     }
 
-    pub fn math_reg_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
+    pub fn maths_reg_addr_byte(&mut self, method: fn(u8, u8) -> (u8, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
@@ -77,7 +77,7 @@ impl VM {
         self.post_process(&dst) + write_cost + read_cost1 + read_cost2 + offset_cost
     }
 
-    pub fn math_reg_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_reg_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
@@ -88,7 +88,7 @@ impl VM {
         self.post_process(&dst) + read_cost + write_cost + offset_cost
     }
 
-    pub fn math_reg_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_reg_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
         let (dst_offset, offset_cost1) = self.pre_process(&dst);
@@ -107,7 +107,7 @@ impl VM {
             + offset_cost2
     }
 
-    pub fn math_addr_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_addr_num_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_word();
         let (dst_value, read_cost) = self.read_word_mem(dst);
@@ -117,7 +117,7 @@ impl VM {
         read_cost + write_cost
     }
 
-    pub fn math_addr_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_addr_reg_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_register();
         let (offset, offset_cost) = self.pre_process(&src);
@@ -129,7 +129,7 @@ impl VM {
         self.post_process(&src) + read_cost1 + read_cost2 + offset_cost + write_cost
     }
 
-    pub fn math_addr_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_addr_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_word();
         let src = self.read_arg_word();
         let (dst_value, read_cost1) = self.read_word_mem(dst);
@@ -140,7 +140,7 @@ impl VM {
         read_cost1 + read_cost2 + write_cost
     }
 
-    pub fn math_reg_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
+    pub fn maths_reg_addr_word(&mut self, method: fn(u16, u16) -> (u16, bool)) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_word();
         let (offset, offset_cost) = self.pre_process(&dst);
@@ -151,6 +151,26 @@ impl VM {
         self.set_math_flags_word(result, carried, has_overflowed_word(dst_value, result));
         self.post_process(&dst) + write_cost + read_cost1 + read_cost2 + offset_cost
     }
+}
+
+pub fn u8_muls(lhs: u8, rhs: u8) -> (u8, bool) {
+    let (value, carried) = (lhs as i8).overflowing_mul(rhs as i8);
+    (value as u8, carried)
+}
+
+pub fn u8_divs(lhs: u8, rhs: u8) -> (u8, bool) {
+    let (value, carried) = (lhs as i8).overflowing_div(rhs as i8);
+    (value as u8, carried)
+}
+
+pub fn u16_muls(lhs: u16, rhs: u16) -> (u16, bool) {
+    let (value, carried) = (lhs as i16).overflowing_mul(rhs as i16);
+    (value as u16, carried)
+}
+
+pub fn u16_divs(lhs: u16, rhs: u16) -> (u16, bool) {
+    let (value, carried) = (lhs as i16).overflowing_div(rhs as i16);
+    (value as u16, carried)
 }
 
 #[allow(clippy::type_complexity)]

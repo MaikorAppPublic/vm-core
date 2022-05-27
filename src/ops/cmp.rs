@@ -7,8 +7,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&lhs);
         let (lhs_value, read_value) = self.read_byte_reg(&lhs, offset);
         self.set_cmp_flags_byte(lhs_value, rhs, signed);
-        self.post_process(&lhs);
-        offset_cost + read_value
+        offset_cost + read_value + self.post_process(&lhs)
     }
 
     pub fn cmp_reg_num_word(&mut self, signed: bool) -> usize {
@@ -17,8 +16,7 @@ impl VM {
         let (offset, offset_cost) = self.pre_process(&lhs);
         let (lhs_value, read_value) = self.read_word_reg(&lhs, offset);
         self.set_cmp_flags_word(lhs_value, rhs, signed);
-        self.post_process(&lhs);
-        offset_cost + read_value
+        offset_cost + read_value + self.post_process(&lhs)
     }
 }
 

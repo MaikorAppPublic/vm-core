@@ -6,9 +6,9 @@ impl VM {
         let addr = self.read_arg_word();
         if jump {
             self.pc = addr;
-            (true, 0)
+            (true, 1)
         } else {
-            (false, 0)
+            (false, 1)
         }
     }
 
@@ -22,8 +22,7 @@ impl VM {
         } else {
             (false, offset_cost + read_cost)
         };
-        self.post_process(&dst);
-        result
+        (result.0, result.1 + self.post_process(&dst))
     }
 
     pub fn jmp_addr(&mut self) -> (bool, usize) {
@@ -90,13 +89,13 @@ mod test {
 
     #[test]
     fn test_costs() {
-        check_jmp_cycles(&[0, 0], 0, VM::jmp_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::je_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::jne_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::jg_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::jl_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::jge_addr);
-        check_jmp_cycles(&[0, 0], 0, VM::jle_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jmp_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::je_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jne_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jg_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jl_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jge_addr);
+        check_jmp_cycles(&[0, 0], 1, VM::jle_addr);
         check_jmp_cycles(&[0], 2, VM::jmp_reg);
         check_jmp_cycles(&[0], 2, VM::je_reg);
         check_jmp_cycles(&[0], 2, VM::jne_reg);
