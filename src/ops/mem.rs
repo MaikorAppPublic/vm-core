@@ -10,10 +10,12 @@ impl VM {
     }
 
     pub fn swap_mem(&mut self, dst: u16, src: u16, count: usize) {
+        let dst = dst as usize;
+        let src = src as usize;
         unsafe {
-            let dst_ptr = self.get_memory_mut(dst as usize, count).as_mut_ptr();
-            let src_ptr = self.get_memory_mut(src as usize, count).as_mut_ptr();
-            std::ptr::swap(src_ptr, dst_ptr);
+            for i in 0..(count) {
+                self.memory.swap(dst + i, src + i)
+            }
         }
     }
 
