@@ -1,6 +1,9 @@
 use crate::VM;
 use std::ops::Not;
 
+type ByteMethod = fn(u8, u8) -> u8;
+type WordMethod = fn(u16, u16) -> u16;
+
 impl VM {
     pub fn not_reg_byte(&mut self) -> usize {
         let reg = self.read_arg_register();
@@ -18,7 +21,7 @@ impl VM {
         offset_cost + read_cost + write_cost + self.post_process(&reg, 2)
     }
 
-    pub fn bl_reg_reg_byte(&mut self, method: fn(u8, u8) -> u8) -> usize {
+    pub fn bl_reg_reg_byte(&mut self, method: ByteMethod) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst, 1);
@@ -36,7 +39,7 @@ impl VM {
             + self.post_process(&src, 1)
     }
 
-    pub fn bl_reg_reg_word(&mut self, method: fn(u16, u16) -> u16) -> usize {
+    pub fn bl_reg_reg_word(&mut self, method: WordMethod) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst, 2);
@@ -54,7 +57,7 @@ impl VM {
             + self.post_process(&src, 2)
     }
 
-    pub fn bl_reg_num_byte(&mut self, method: fn(u8, u8) -> u8) -> usize {
+    pub fn bl_reg_num_byte(&mut self, method: ByteMethod) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_byte();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst, 1);
@@ -64,7 +67,7 @@ impl VM {
         dst_offset_cost + dst_read_cost + write_cost + self.post_process(&dst, 1)
     }
 
-    pub fn bl_reg_num_word(&mut self, method: fn(u16, u16) -> u16) -> usize {
+    pub fn bl_reg_num_word(&mut self, method: WordMethod) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_word();
         let (dst_offset, dst_offset_cost) = self.pre_process(&dst, 2);
@@ -77,6 +80,7 @@ impl VM {
 
 #[cfg(test)]
 mod test {
+    use crate::ops::bitlogic::{ByteMethod, WordMethod};
     use crate::ops::test::check_cycles;
     use crate::VM;
     use maikor_platform::mem::address::RESERVED;
@@ -85,8 +89,8 @@ mod test {
     pub fn bitwise_check_cycles_byte(
         bytes: &[u8],
         expected_cycles: usize,
-        method: fn(&mut VM, fn(u8, u8) -> u8) -> usize,
-        bmethod: fn(u8, u8) -> u8,
+        method: fn(&mut VM, ByteMethod) -> usize,
+        bmethod: ByteMethod,
     ) {
         let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;
@@ -99,8 +103,8 @@ mod test {
     pub fn bitwise_check_cycles_word(
         bytes: &[u8],
         expected_cycles: usize,
-        method: fn(&mut VM, fn(u16, u16) -> u16) -> usize,
-        bmethod: fn(u16, u16) -> u16,
+        method: fn(&mut VM, WordMethod) -> usize,
+        bmethod: WordMethod,
     ) {
         let mut vm = VM::new_test();
         vm.arg_ptr = RESERVED;

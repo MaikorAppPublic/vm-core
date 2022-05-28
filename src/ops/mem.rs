@@ -9,15 +9,14 @@ impl VM {
         }
     }
 
+    #[allow(clippy::manual_swap)] //manual is 2x faster
     pub fn swap_mem(&mut self, dst: u16, src: u16, count: usize) {
         let dst = dst as usize;
         let src = src as usize;
-        unsafe {
-            for i in 0..(count) {
-                let tmp = self.memory[dst + i];
-                self.memory[dst + i] = self.memory[src + i];
-                self.memory[src + i] = tmp;
-            }
+        for i in 0..(count) {
+            let tmp = self.memory[dst + i];
+            self.memory[dst + i] = self.memory[src + i];
+            self.memory[src + i] = tmp;
         }
     }
 
