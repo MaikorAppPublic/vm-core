@@ -157,6 +157,13 @@ impl VM {
             self.atlas_banks.len(),
             Some(0),
         );
+        self.init_bank(
+            "SAVE",
+            address::SAVE_BANK_ID,
+            0,
+            self.save_banks.len(),
+            None,
+        );
     }
 
     #[allow(unused_must_use)]
