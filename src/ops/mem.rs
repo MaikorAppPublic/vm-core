@@ -14,7 +14,9 @@ impl VM {
         let src = src as usize;
         unsafe {
             for i in 0..(count) {
-                self.memory.swap(dst + i, src + i)
+                let tmp = self.memory[dst + i];
+                self.memory[dst + i] = self.memory[src + i];
+                self.memory[src + i] = tmp;
             }
         }
     }
