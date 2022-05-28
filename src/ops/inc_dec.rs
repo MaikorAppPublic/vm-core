@@ -3,38 +3,38 @@ use crate::VM;
 impl VM {
     pub fn inc_reg_byte(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
         let final_cost = self.write_byte_reg(&reg, offset, value) + cost;
-        final_cost + offset_cost + self.post_process(&reg)
+        final_cost + offset_cost + self.post_process(&reg, 1)
     }
 
     pub fn dec_reg_byte(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (value, cost) = self.read_byte_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
         let final_cost = self.write_byte_reg(&reg, offset, value) + cost;
-        final_cost + offset_cost + self.post_process(&reg)
+        final_cost + offset_cost + self.post_process(&reg, 1)
     }
 
     pub fn inc_reg_word(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_add(1);
         let final_cost = self.write_word_reg(&reg, offset, value) + cost;
-        final_cost + offset_cost + self.post_process(&reg)
+        final_cost + offset_cost + self.post_process(&reg, 2)
     }
 
     pub fn dec_reg_word(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (value, cost) = self.read_word_reg(&reg, offset);
         let (value, _) = value.overflowing_sub(1);
         let final_cost = self.write_word_reg(&reg, offset, value) + cost;
-        final_cost + offset_cost + self.post_process(&reg)
+        final_cost + offset_cost + self.post_process(&reg, 2)
     }
 
     pub fn inc_addr_byte(&mut self) -> usize {

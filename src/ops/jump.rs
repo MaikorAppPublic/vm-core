@@ -14,7 +14,7 @@ impl VM {
 
     fn jmp_reg_conditional(&mut self, jump: bool) -> (bool, usize) {
         let dst = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&dst);
+        let (offset, offset_cost) = self.pre_process(&dst, 2);
         let (addr, read_cost) = self.read_word_reg(&dst, offset);
         let result = if jump {
             self.pc = addr;
@@ -22,7 +22,7 @@ impl VM {
         } else {
             (false, offset_cost + read_cost)
         };
-        (result.0, result.1 + self.post_process(&dst))
+        (result.0, result.1 + self.post_process(&dst, 2))
     }
 
     pub fn jmp_addr(&mut self) -> (bool, usize) {

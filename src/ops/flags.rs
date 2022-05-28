@@ -6,16 +6,16 @@ impl VM {
     pub fn jb_reg_reg(&mut self, required: bool) -> (bool, usize) {
         let dst = self.read_arg_register();
         let mask = self.read_arg_register();
-        let (mask_offset, mask_offset_cost) = self.pre_process(&mask);
-        let (dst_offset, dst_offset_cost) = self.pre_process(&dst);
+        let (mask_offset, mask_offset_cost) = self.pre_process(&mask, 1);
+        let (dst_offset, dst_offset_cost) = self.pre_process(&dst, 2);
         let (mask_value, mask_cost) = self.read_byte_reg(&mask, mask_offset);
         let (dst_value, dst_cost) = self.read_word_reg(&dst, dst_offset);
         let cost = mask_offset_cost
             + dst_offset_cost
             + mask_cost
             + dst_cost
-            + self.post_process(&mask)
-            + self.post_process(&dst);
+            + self.post_process(&mask, 1)
+            + self.post_process(&dst, 2);
         if required == self.check_flag(mask_value) {
             self.pc = dst_value;
             return (true, 1 + cost);
@@ -28,9 +28,9 @@ impl VM {
     pub fn jb_addr_reg(&mut self, required: bool) -> (bool, usize) {
         let dst = self.read_arg_word();
         let mask = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&mask);
+        let (offset, offset_cost) = self.pre_process(&mask, 2);
         let (mask_value, read_cost) = self.read_byte_reg(&mask, offset);
-        let cost = read_cost + offset_cost + self.post_process(&mask);
+        let cost = read_cost + offset_cost + self.post_process(&mask, 2);
         if required == self.check_flag(mask_value) {
             self.pc = dst;
             return (true, 1 + cost);
@@ -43,9 +43,9 @@ impl VM {
     pub fn jb_reg_num(&mut self, required: bool) -> (bool, usize) {
         let dst = self.read_arg_register();
         let mask = self.read_arg_byte();
-        let (offset, offset_cost) = self.pre_process(&dst);
+        let (offset, offset_cost) = self.pre_process(&dst, 2);
         let (addr, read_cost) = self.read_word_reg(&dst, offset);
-        let cost = self.post_process(&dst) + read_cost + offset_cost;
+        let cost = self.post_process(&dst, 2) + read_cost + offset_cost;
         if required == self.check_flag(mask) {
             self.pc = addr;
             return (true, 1 + cost);

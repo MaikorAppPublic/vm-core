@@ -65,13 +65,13 @@ impl VM {
 
     pub fn call_reg(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_calc) = self.pre_process(&reg);
+        let (offset, offset_calc) = self.pre_process(&reg, 2);
         let (addr, calc) = self.read_word_reg(&reg, offset);
         let (result, cost) = self.setup_stack(self.pc + 2);
         if result {
             self.pc = addr;
         }
-        offset_calc + calc + cost + self.post_process(&reg)
+        offset_calc + calc + cost + self.post_process(&reg, 2)
     }
 
     pub fn ret(&mut self) -> usize {
@@ -83,19 +83,19 @@ impl VM {
 
     pub fn push_reg_byte(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (value, read_cost) = self.read_byte_reg(&reg, offset);
         self.memory[address::SP] = value;
         self.update_sp(1);
-        offset_cost + read_cost + self.post_process(&reg) + 1
+        offset_cost + read_cost + self.post_process(&reg, 1) + 1
     }
 
     pub fn push_reg_word(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (value, read_cost) = self.read_word_reg(&reg, offset);
         let write_cost = self.write_to_stack(value);
-        write_cost + offset_cost + read_cost + self.post_process(&reg)
+        write_cost + offset_cost + read_cost + self.post_process(&reg, 2)
     }
 
     pub fn push_num_byte(&mut self) -> usize {
@@ -111,20 +111,20 @@ impl VM {
 
     pub fn pop_reg_byte(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         self.update_sp(-1);
         let (addr, read_cost) = self.read_byte_mem(self.get_sp());
         let write_cost = self.write_byte_reg(&reg, offset, addr);
-        offset_cost + read_cost + write_cost
+        self.post_process(&reg, 1) + offset_cost + read_cost + write_cost
     }
 
     pub fn pop_reg_word(&mut self) -> usize {
         let reg = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         self.update_sp(-1);
         let (addr, read_cost) = self.read_word_mem(self.get_sp());
         let write_cost = self.write_word_reg(&reg, offset, addr);
-        offset_cost + read_cost + write_cost
+        self.post_process(&reg, 2) + offset_cost + read_cost + write_cost
     }
 }
 

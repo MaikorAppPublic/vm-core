@@ -4,18 +4,18 @@ impl VM {
     pub fn swap_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (dst_offset, offset_cost1) = self.pre_process(&dst);
-        let (src_offset, offset_cost2) = self.pre_process(&src);
+        let (dst_offset, offset_cost1) = self.pre_process(&dst, 1);
+        let (src_offset, offset_cost2) = self.pre_process(&src, 1);
         if !dst.is_indirect && !src.is_indirect {
             self.registers.swap(dst.addr, src.addr);
-            return self.post_process(&dst) + self.post_process(&src) + 1;
+            return self.post_process(&dst, 1) + self.post_process(&src, 1) + 1;
         }
         let (lhs, cost1) = self.read_byte_reg(&dst, dst_offset);
         let (rhs, cost2) = self.read_byte_reg(&src, src_offset);
         let cost3 = self.write_byte_reg(&dst, dst_offset, rhs);
         let cost4 = self.write_byte_reg(&src, src_offset, lhs);
-        self.post_process(&dst)
-            + self.post_process(&src)
+        self.post_process(&dst, 1)
+            + self.post_process(&src, 1)
             + cost1
             + cost2
             + cost3
@@ -27,19 +27,19 @@ impl VM {
     pub fn swap_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (dst_offset, offset_cost1) = self.pre_process(&dst);
-        let (src_offset, offset_cost2) = self.pre_process(&src);
+        let (dst_offset, offset_cost1) = self.pre_process(&dst, 2);
+        let (src_offset, offset_cost2) = self.pre_process(&src, 2);
         if !dst.is_indirect && !src.is_indirect {
             self.registers.swap(dst.addr, src.addr);
             self.registers.swap(dst.addr + 1, src.addr + 1);
-            return self.post_process(&dst) + self.post_process(&src) + 1;
+            return self.post_process(&dst, 2) + self.post_process(&src, 2) + 1;
         }
         let (lhs, cost1) = self.read_word_reg(&dst, dst_offset);
         let (rhs, cost2) = self.read_word_reg(&src, src_offset);
         let cost3 = self.write_word_reg(&dst, dst_offset, rhs);
         let cost4 = self.write_word_reg(&src, src_offset, lhs);
-        self.post_process(&dst)
-            + self.post_process(&src)
+        self.post_process(&dst, 2)
+            + self.post_process(&src, 2)
             + cost1
             + cost2
             + cost3

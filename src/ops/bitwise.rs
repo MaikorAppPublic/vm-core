@@ -34,11 +34,11 @@ impl VM {
     }
 
     fn bitwise_reg_byte(&mut self, reg: Register, amount: u32, method: fn(u8, u32) -> u8) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (value, read_cost) = self.read_byte_reg(&reg, offset);
         let result = method(value, amount);
         let write_cost = self.write_byte_reg(&reg, offset, result);
-        write_cost + read_cost + offset_cost
+        write_cost + read_cost + offset_cost + self.post_process(&reg, 1)
     }
 
     fn bitwise_reg_word(
@@ -47,15 +47,15 @@ impl VM {
         amount: u32,
         method: fn(u16, u32) -> u16,
     ) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (value, read_cost) = self.read_word_reg(&reg, offset);
         let result = method(value, amount);
         let write_cost = self.write_word_reg(&reg, offset, result);
-        write_cost + read_cost + offset_cost
+        write_cost + read_cost + offset_cost + self.post_process(&reg, 2)
     }
 
     fn rcl_byte(&mut self, reg: Register, amount: u32) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (mut value, read_cost) = self.read_byte_reg(&reg, offset);
         for _ in 0..amount {
             let set_carry = is_first_bit_set_byte(value);
@@ -70,11 +70,11 @@ impl VM {
             }
         }
         let write_cost = self.write_byte_reg(&reg, offset, value);
-        write_cost + read_cost + offset_cost + (amount * 2) as usize
+        write_cost + read_cost + offset_cost + (amount * 2) as usize + self.post_process(&reg, 1)
     }
 
     fn rcr_byte(&mut self, reg: Register, amount: u32) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 1);
         let (mut value, read_cost) = self.read_byte_reg(&reg, offset);
         for _ in 0..amount {
             let set_carry = is_last_bit_set_byte(value);
@@ -89,11 +89,11 @@ impl VM {
             }
         }
         let write_cost = self.write_byte_reg(&reg, offset, value);
-        write_cost + read_cost + offset_cost + (amount * 2) as usize
+        write_cost + read_cost + offset_cost + (amount * 2) as usize + self.post_process(&reg, 1)
     }
 
     fn rcl_word(&mut self, reg: Register, amount: u32) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (mut value, read_cost) = self.read_word_reg(&reg, offset);
         for _ in 0..amount {
             let set_carry = is_first_bit_set_word(value);
@@ -108,11 +108,11 @@ impl VM {
             }
         }
         let write_cost = self.write_word_reg(&reg, offset, value);
-        write_cost + read_cost + offset_cost + (amount * 2) as usize
+        write_cost + read_cost + offset_cost + (amount * 2) as usize + self.post_process(&reg, 2)
     }
 
     fn rcr_word(&mut self, reg: Register, amount: u32) -> usize {
-        let (offset, offset_cost) = self.pre_process(&reg);
+        let (offset, offset_cost) = self.pre_process(&reg, 2);
         let (mut value, read_cost) = self.read_word_reg(&reg, offset);
         for _ in 0..amount {
             let set_carry = is_last_bit_set_word(value);
@@ -127,7 +127,7 @@ impl VM {
             }
         }
         let write_cost = self.write_word_reg(&reg, offset, value);
-        write_cost + read_cost + offset_cost + (amount * 2) as usize
+        write_cost + read_cost + offset_cost + (amount * 2) as usize + self.post_process(&reg, 2)
     }
 }
 
@@ -340,64 +340,64 @@ impl VM {
     pub fn asl_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.bitwise_reg_byte(dst, value as u32, u8::shl);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn asr_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.bitwise_reg_byte(dst, value as u32, asr_byte);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn lsr_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.bitwise_reg_byte(dst, value as u32, u8::shr);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rol_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.bitwise_reg_byte(dst, value as u32, u8::rotate_left);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn ror_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.bitwise_reg_byte(dst, value as u32, u8::rotate_right);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rcl_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.rcl_byte(dst, value as u32);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rcr_reg_reg_byte(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 1);
         let (value, read_cost) = self.read_byte_reg(&src, offset);
         let calc_cost = self.rcr_byte(dst, value as u32);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 1) + offset_cost + read_cost + calc_cost
     }
 }
 
@@ -406,64 +406,64 @@ impl VM {
     pub fn asl_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.bitwise_reg_word(dst, value as u32, u16::shl);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn asr_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.bitwise_reg_word(dst, value as u32, asr_word);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn lsr_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.bitwise_reg_word(dst, value as u32, u16::shr);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rol_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.bitwise_reg_word(dst, value as u32, u16::rotate_left);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn ror_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.bitwise_reg_word(dst, value as u32, u16::rotate_right);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rcl_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.rcl_word(dst, value as u32);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 
     pub fn rcr_reg_reg_word(&mut self) -> usize {
         let dst = self.read_arg_register();
         let src = self.read_arg_register();
-        let (offset, offset_cost) = self.pre_process(&src);
+        let (offset, offset_cost) = self.pre_process(&src, 2);
         let (value, read_cost) = self.read_word_reg(&src, offset);
         let calc_cost = self.rcr_word(dst, value as u32);
-        self.post_process(&src) + offset_cost + read_cost + calc_cost
+        self.post_process(&src, 2) + offset_cost + read_cost + calc_cost
     }
 }
 
