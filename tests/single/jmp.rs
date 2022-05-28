@@ -4,6 +4,16 @@ use maikor_platform::registers::flags::{GREATER_THAN, LESS_THAN};
 use maikor_vm_core::VM;
 
 #[test]
+pub fn test_relative_jumps() {
+    let mut vm = VM::new_test();
+    assert_eq!(vm.pc, 0);
+    vm.execute_op(&[JRF_BYTE, 15]);
+    assert_eq!(vm.pc, 15);
+    vm.execute_op(&[JRB_BYTE, 6]);
+    assert_eq!(vm.pc, 9);
+}
+
+#[test]
 pub fn test_jmp_addr() {
     test_jump_addr("jmp", JMP_ADDR, false, false, 256);
     test_jump_addr("jmp", JMP_ADDR, true, false, 256);

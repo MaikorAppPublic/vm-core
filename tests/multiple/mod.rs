@@ -1,3 +1,5 @@
+mod bank_management;
+
 use crate::{compare_memory, compare_registers};
 use maikor_platform::ops::{
     ADD_REG_NUM_BYTE, CPY_ADDR_REG_WORD, CPY_REG_REG_BYTE, HALT, INC_REG_BYTE, JBC_ADDR_NUM,

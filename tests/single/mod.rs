@@ -2,11 +2,12 @@ use crate::{compare_memory, compare_registers};
 use maikor_vm_core::VM;
 
 mod add;
-mod addc;
+mod dec;
 mod inc;
 mod jmp;
+mod mcpy;
+mod mswp;
 mod mul;
-mod sub;
 mod swap;
 
 //execute op on a new vm, and compare registers and memory afterwards
