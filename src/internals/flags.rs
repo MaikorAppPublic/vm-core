@@ -29,14 +29,52 @@ impl VM {
     }
 }
 
+/// First bit is the left most
 #[inline(always)]
-fn is_first_bit_set_byte(value: u8) -> bool {
+pub fn is_first_bit_set_byte(value: u8) -> bool {
     value & 0b10000000 == 0b10000000
 }
 
+/// First bit is the left most
 #[inline(always)]
-fn is_first_bit_set_word(value: u16) -> bool {
+pub fn is_first_bit_set_word(value: u16) -> bool {
     value & 0b1000000000000000 == 0b1000000000000000
+}
+
+/// Last bit is the right most
+#[inline(always)]
+pub fn is_last_bit_set_byte(value: u8) -> bool {
+    value & 0b00000001 == 0b00000001
+}
+
+/// Last bit is the right most
+#[inline(always)]
+pub fn is_last_bit_set_word(value: u16) -> bool {
+    value & 0b0000000000000001 == 0b0000000000000001
+}
+
+/// First bit is the left most
+#[inline(always)]
+pub fn set_first_bit_byte(value: u8) -> u8 {
+    value | 0b10000000
+}
+
+/// First bit is the left most
+#[inline(always)]
+pub fn set_first_bit_word(value: u16) -> u16 {
+    value | 0b1000000000000000
+}
+
+/// Last bit is the right most
+#[inline(always)]
+pub fn set_last_bit_byte(value: u8) -> u8 {
+    value | 0b00000001
+}
+
+/// Last bit is the right most
+#[inline(always)]
+pub fn set_last_bit_word(value: u16) -> u16 {
+    value | 0b0000000000000001
 }
 
 #[inline(always)]
@@ -123,11 +161,19 @@ mod test {
     use maikor_platform::registers::flags::*;
 
     #[test]
+    fn test_setting_bits() {
+        assert_eq!(set_first_bit_byte(0), 128);
+        assert_eq!(set_first_bit_word(0), 32768);
+        assert_eq!(set_last_bit_word(0), 1);
+        assert_eq!(set_last_bit_byte(0), 1);
+    }
+
+    #[test]
     fn test_is_first_bit_set_byte() {
         for i in 0..128 {
             assert!(!is_first_bit_set_byte(i), "{i}")
         }
-        for i in 128..255 {
+        for i in 128..=255 {
             assert!(is_first_bit_set_byte(i), "{i}")
         }
     }
@@ -137,8 +183,22 @@ mod test {
         for i in 0..32768 {
             assert!(!is_first_bit_set_word(i), "{i}")
         }
-        for i in 32768..65535 {
+        for i in 32768..=65535 {
             assert!(is_first_bit_set_word(i), "{i}")
+        }
+    }
+
+    #[test]
+    fn test_is_last_bit_set_byte() {
+        for i in 0..=255 {
+            assert_eq!(is_last_bit_set_byte(i), i % 2 != 0, "{i}")
+        }
+    }
+
+    #[test]
+    fn test_if_last_bit_set_word() {
+        for i in 0..=65535 {
+            assert_eq!(is_last_bit_set_word(i), i % 2 != 0, "{i}")
         }
     }
 

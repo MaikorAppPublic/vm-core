@@ -2,6 +2,7 @@ use crate::register::Register;
 use crate::VM;
 
 mod bitlogic;
+mod bitwise;
 mod cmp;
 mod cpy;
 pub mod execute_command;
