@@ -1,5 +1,16 @@
 ## Pre-alpha
 
+### 0.1.10
+- Update dependencies
+  - Language to 0.1.22
+- Fix bugs:
+  - Incorrect PPID change amounts
+  - Save bank not loaded on init
+  - MSWP only swapping first byte
+  - Atlas banks 3 and 4 not loading
+- Add bitwise methods (OR, AND, etc)
+- Add stack methods (PUSH, CALL, etc)
+
 ### 0.1.9
 - Add support for sound
 - Add support for interrupts
