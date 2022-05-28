@@ -74,3 +74,59 @@ impl VM {
         dst_offset_cost + dst_read_cost + write_cost + self.post_process(&dst)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::ops::test::check_cycles;
+    use crate::VM;
+    use maikor_platform::mem::address::RESERVED;
+    use std::ops::{BitAnd, BitOr, BitXor};
+
+    pub fn bitwise_check_cycles_byte(
+        bytes: &[u8],
+        expected_cycles: usize,
+        method: fn(&mut VM, fn(u8, u8) -> u8) -> usize,
+        bmethod: fn(u8, u8) -> u8,
+    ) {
+        let mut vm = VM::new_test();
+        vm.arg_ptr = RESERVED;
+        for (i, byte) in bytes.iter().enumerate() {
+            vm.memory[RESERVED as usize + i] = *byte;
+        }
+        assert_eq!(method(&mut vm, bmethod), expected_cycles)
+    }
+
+    pub fn bitwise_check_cycles_word(
+        bytes: &[u8],
+        expected_cycles: usize,
+        method: fn(&mut VM, fn(u16, u16) -> u16) -> usize,
+        bmethod: fn(u16, u16) -> u16,
+    ) {
+        let mut vm = VM::new_test();
+        vm.arg_ptr = RESERVED;
+        for (i, byte) in bytes.iter().enumerate() {
+            vm.memory[RESERVED as usize + i] = *byte;
+        }
+        assert_eq!(method(&mut vm, bmethod), expected_cycles)
+    }
+
+    #[test]
+    fn test_costs() {
+        check_cycles(&[0, 0], 2, VM::not_reg_byte);
+        check_cycles(&[0, 0], 4, VM::not_reg_word);
+
+        bitwise_check_cycles_byte(&[0, 0], 3, VM::bl_reg_reg_byte, u8::bitand);
+        bitwise_check_cycles_byte(&[0, 0], 3, VM::bl_reg_reg_byte, u8::bitor);
+        bitwise_check_cycles_byte(&[0, 0], 3, VM::bl_reg_reg_byte, u8::bitxor);
+        bitwise_check_cycles_word(&[0, 0], 6, VM::bl_reg_reg_word, u16::bitand);
+        bitwise_check_cycles_word(&[0, 0], 6, VM::bl_reg_reg_word, u16::bitor);
+        bitwise_check_cycles_word(&[0, 0], 6, VM::bl_reg_reg_word, u16::bitxor);
+
+        bitwise_check_cycles_byte(&[0, 0], 2, VM::bl_reg_num_byte, u8::bitand);
+        bitwise_check_cycles_byte(&[0, 0], 2, VM::bl_reg_num_byte, u8::bitor);
+        bitwise_check_cycles_byte(&[0, 0], 2, VM::bl_reg_num_byte, u8::bitxor);
+        bitwise_check_cycles_word(&[0, 0], 4, VM::bl_reg_num_word, u16::bitand);
+        bitwise_check_cycles_word(&[0, 0], 4, VM::bl_reg_num_word, u16::bitor);
+        bitwise_check_cycles_word(&[0, 0], 4, VM::bl_reg_num_word, u16::bitxor);
+    }
+}
