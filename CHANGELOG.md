@@ -1,5 +1,10 @@
 ## Pre-alpha
 
+### 0.1.12
+- Update dependencies
+  - Language to 0.1.25
+- Controller banking now works
+
 ### 0.1.11
 - Add support for loading game files
 

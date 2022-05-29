@@ -2,6 +2,7 @@ use crate::mem::{address, sizes};
 use crate::register::offset;
 use crate::sound::Sound;
 use maikor_platform::constants::SAVE_COUNT;
+use maikor_platform::input::controller_type;
 use maikor_platform::mem::address::interrupt;
 use maikor_platform::mem::interrupt_flags;
 use maikor_platform::registers;
@@ -141,14 +142,38 @@ impl VM {
     /// Once this has been called the banks and memory shouldn't be changed by the host
     /// (except for setting flags, interrupts, etc)
     pub fn init(&mut self) {
-        self.init_bank(
-            "CODE",
-            address::CODE_BANK_ID,
-            0,
-            self.code_banks.len(),
-            None,
-        );
-        self.init_bank("RAM", address::RAM_BANK_ID, 0, self.ram_banks.len(), None);
+        if !self.code_banks.is_empty() {
+            self.init_bank(
+                "CODE 1",
+                address::CODE_BANK_1_ID,
+                0,
+                self.code_banks.len(),
+                None,
+            );
+            self.init_bank(
+                "CODE 2",
+                address::CODE_BANK_2_ID,
+                1,
+                self.code_banks.len(),
+                Some(0),
+            );
+        }
+        if !self.ram_banks.is_empty() {
+            self.init_bank(
+                "RAM 1",
+                address::RAM_BANK_1_ID,
+                0,
+                self.ram_banks.len(),
+                None,
+            );
+            self.init_bank(
+                "RAM 2",
+                address::RAM_BANK_2_ID,
+                1,
+                self.ram_banks.len(),
+                Some(0),
+            );
+        }
         self.init_bank(
             "ATLAS 1",
             address::ATLAS1_BANK_ID,
@@ -182,6 +207,13 @@ impl VM {
             address::SAVE_BANK_ID,
             0,
             self.save_banks.len(),
+            None,
+        );
+        self.init_bank(
+            "CONTROLLER",
+            address::CONTROLLER_GRAPHICS,
+            controller_type::UNKNOWN,
+            self.controller_graphics_banks.len(),
             None,
         );
     }

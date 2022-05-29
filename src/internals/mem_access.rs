@@ -65,20 +65,40 @@ impl VM {
     #[must_use]
     fn load_banks(&mut self, addr: usize, value: usize) -> usize {
         match addr {
-            address::CODE_BANK_ID => {
+            address::CODE_BANK_1_ID => {
                 if value < self.code_banks.len() {
                     self.load_bank(
-                        address::CODE_BANK,
+                        address::CODE_BANK_1,
                         sizes::CODE_BANK,
                         self.code_banks[value].as_ptr(),
                     );
                     return 20;
                 }
             }
-            address::RAM_BANK_ID => {
+            address::CODE_BANK_2_ID => {
+                if value < self.code_banks.len() {
+                    self.load_bank(
+                        address::CODE_BANK_2,
+                        sizes::CODE_BANK,
+                        self.code_banks[value].as_ptr(),
+                    );
+                    return 20;
+                }
+            }
+            address::RAM_BANK_1_ID => {
                 if value < self.ram_banks.len() {
                     self.load_bank(
-                        address::RAM_BANK,
+                        address::RAM_BANK_1,
+                        sizes::RAM_BANK,
+                        self.ram_banks[value].as_ptr(),
+                    );
+                    return 20;
+                }
+            }
+            address::RAM_BANK_2_ID => {
+                if value < self.ram_banks.len() {
+                    self.load_bank(
+                        address::RAM_BANK_2,
                         sizes::RAM_BANK,
                         self.ram_banks[value].as_ptr(),
                     );
@@ -168,14 +188,24 @@ impl VM {
     // copied across then it would become `if in code_bank, else if in ram_bank, etc, else mem[addr]`
     // need to perf test but `match` might be ok for speed here
     fn write_mem_change_to_bank(&mut self, addr: usize, value: u8) -> usize {
-        if is_inside_code_bank(addr) {
-            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_ID] as usize];
-            let code_bank_addr = addr - address::CODE_BANK;
+        if is_inside_code_bank_1(addr) {
+            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_1_ID] as usize];
+            let code_bank_addr = addr - address::CODE_BANK_1;
             code_bank[code_bank_addr] = value;
             1
-        } else if is_inside_ram_bank(addr) {
-            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_ID] as usize];
-            let ram_bank_addr = addr - address::RAM_BANK;
+        } else if is_inside_code_bank_2(addr) {
+            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_2_ID] as usize];
+            let code_bank_addr = addr - address::CODE_BANK_2;
+            code_bank[code_bank_addr] = value;
+            1
+        } else if is_inside_ram_bank_1(addr) {
+            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_1_ID] as usize];
+            let ram_bank_addr = addr - address::RAM_BANK_1;
+            ram_bank[ram_bank_addr] = value;
+            1
+        } else if is_inside_ram_bank_2(addr) {
+            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_2_ID] as usize];
+            let ram_bank_addr = addr - address::RAM_BANK_2;
             ram_bank[ram_bank_addr] = value;
             1
         } else if is_inside_save_bank(addr) {
@@ -213,14 +243,26 @@ impl VM {
 
 #[inline(always)]
 #[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_code_bank(addr: usize) -> bool {
-    addr >= address::CODE_BANK && addr < address::CODE_BANK + sizes::CODE_BANK
+fn is_inside_code_bank_1(addr: usize) -> bool {
+    addr >= address::CODE_BANK_1 && addr < address::CODE_BANK_1 + sizes::CODE_BANK
 }
 
 #[inline(always)]
 #[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_ram_bank(addr: usize) -> bool {
-    addr >= address::RAM_BANK && addr < address::RAM_BANK + sizes::RAM_BANK
+fn is_inside_ram_bank_1(addr: usize) -> bool {
+    addr >= address::RAM_BANK_1 && addr < address::RAM_BANK_1 + sizes::RAM_BANK
+}
+
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
+fn is_inside_code_bank_2(addr: usize) -> bool {
+    addr >= address::CODE_BANK_2 && addr < address::CODE_BANK_2 + sizes::CODE_BANK
+}
+
+#[inline(always)]
+#[allow(clippy::manual_range_contains)] //range is 2x slower
+fn is_inside_ram_bank_2(addr: usize) -> bool {
+    addr >= address::RAM_BANK_2 && addr < address::RAM_BANK_2 + sizes::RAM_BANK
 }
 
 #[inline(always)]

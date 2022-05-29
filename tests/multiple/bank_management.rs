@@ -42,30 +42,36 @@ fn test_swapping_banks() {
         [115; sizes::SAVE_BANK as usize],
     ];
 
+    vm.controller_graphics_banks = vec![[0; 88]; 9];
+
     vm.init();
 
-    assert_eq!(vm.memory[address::RAM_BANK_ID as usize], 0);
-    assert_eq!(vm.memory[address::CODE_BANK_ID as usize], 0);
+    assert_eq!(vm.memory[address::RAM_BANK_1_ID as usize], 0);
+    assert_eq!(vm.memory[address::CODE_BANK_1_ID as usize], 0);
+    assert_eq!(vm.memory[address::RAM_BANK_2_ID as usize], 1);
+    assert_eq!(vm.memory[address::CODE_BANK_2_ID as usize], 1);
     assert_eq!(vm.memory[address::SAVE_BANK_ID as usize], 0);
     assert_eq!(vm.memory[address::ATLAS1_BANK_ID as usize], 0);
     assert_eq!(vm.memory[address::ATLAS2_BANK_ID as usize], 1);
     assert_eq!(vm.memory[address::ATLAS3_BANK_ID as usize], 2);
     assert_eq!(vm.memory[address::ATLAS4_BANK_ID as usize], 3);
-    assert_eq!(vm.memory[address::RAM_BANK as usize], 2);
-    assert_eq!(vm.memory[address::CODE_BANK as usize], 90);
+    assert_eq!(vm.memory[address::RAM_BANK_1 as usize], 2);
+    assert_eq!(vm.memory[address::CODE_BANK_1 as usize], 90);
+    assert_eq!(vm.memory[address::RAM_BANK_2 as usize], 3);
+    assert_eq!(vm.memory[address::CODE_BANK_2 as usize], 91);
     assert_eq!(vm.memory[address::SAVE_BANK as usize], 100);
     assert_eq!(vm.memory[address::ATLAS1 as usize], 12);
     assert_eq!(vm.memory[address::ATLAS2 as usize], 13);
     assert_eq!(vm.memory[address::ATLAS3 as usize], 14);
     assert_eq!(vm.memory[address::ATLAS4 as usize], 15);
 
-    vm.debug_set_mem(address::RAM_BANK_ID, 2);
-    assert_eq!(vm.memory[address::RAM_BANK_ID as usize], 2);
-    assert_eq!(vm.memory[address::RAM_BANK as usize], 4);
+    vm.debug_set_mem(address::RAM_BANK_1_ID, 2);
+    assert_eq!(vm.memory[address::RAM_BANK_1_ID as usize], 2);
+    assert_eq!(vm.memory[address::RAM_BANK_1 as usize], 4);
 
-    vm.debug_set_mem(address::CODE_BANK_ID, 1);
-    assert_eq!(vm.memory[address::CODE_BANK_ID as usize], 1);
-    assert_eq!(vm.memory[address::CODE_BANK as usize], 91);
+    vm.debug_set_mem(address::CODE_BANK_1_ID, 1);
+    assert_eq!(vm.memory[address::CODE_BANK_1_ID as usize], 1);
+    assert_eq!(vm.memory[address::CODE_BANK_1 as usize], 91);
 
     vm.debug_set_mem(address::SAVE_BANK_ID, 6);
     assert_eq!(vm.memory[address::SAVE_BANK_ID as usize], 6);

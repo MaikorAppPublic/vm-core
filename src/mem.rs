@@ -14,8 +14,10 @@ pub mod sizes {
 pub mod address {
     use maikor_platform::mem::address;
 
-    pub const CODE_BANK: usize = address::CODE_BANK as usize;
-    pub const RAM_BANK: usize = address::RAM_BANK as usize;
+    pub const CODE_BANK_1: usize = address::CODE_BANK_1 as usize;
+    pub const RAM_BANK_1: usize = address::RAM_BANK_1 as usize;
+    pub const CODE_BANK_2: usize = address::CODE_BANK_2 as usize;
+    pub const RAM_BANK_2: usize = address::RAM_BANK_2 as usize;
     pub const SOUND: usize = address::SOUND as usize;
     pub const WAVE_TABLE: usize = address::WAVE_TABLE as usize;
     pub const SAVE_BANK_ID: usize = address::SAVE_BANK_ID as usize;
@@ -24,8 +26,10 @@ pub mod address {
     pub const ATLAS2: usize = address::ATLAS2 as usize;
     pub const ATLAS3: usize = address::ATLAS3 as usize;
     pub const ATLAS4: usize = address::ATLAS4 as usize;
-    pub const CODE_BANK_ID: usize = address::CODE_BANK_ID as usize;
-    pub const RAM_BANK_ID: usize = address::RAM_BANK_ID as usize;
+    pub const CODE_BANK_1_ID: usize = address::CODE_BANK_1_ID as usize;
+    pub const RAM_BANK_1_ID: usize = address::RAM_BANK_1_ID as usize;
+    pub const CODE_BANK_2_ID: usize = address::CODE_BANK_2_ID as usize;
+    pub const RAM_BANK_2_ID: usize = address::RAM_BANK_2_ID as usize;
     pub const ATLAS1_BANK_ID: usize = address::ATLAS1_BANK_ID as usize;
     pub const ATLAS2_BANK_ID: usize = address::ATLAS2_BANK_ID as usize;
     pub const ATLAS3_BANK_ID: usize = address::ATLAS3_BANK_ID as usize;
