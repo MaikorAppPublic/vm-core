@@ -1,5 +1,8 @@
 ## Pre-alpha
 
+### 0.1.11
+- Add support for loading game files
+
 ### 0.1.10
 - Update dependencies
   - Language to 0.1.22

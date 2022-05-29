@@ -6,6 +6,7 @@ use maikor_platform::mem::address::interrupt;
 use maikor_platform::mem::interrupt_flags;
 use maikor_platform::registers;
 use maikor_platform::registers::flags::INTERRUPTS;
+use maikor_vm_file::GameFile;
 
 mod internals;
 mod mem;
@@ -26,6 +27,7 @@ pub struct VM {
     pub ram_banks: Vec<[u8; sizes::RAM_BANK]>,
     pub code_banks: Vec<[u8; sizes::CODE_BANK]>,
     pub save_banks: Vec<[u8; sizes::SAVE_BANK]>,
+    pub controller_graphics_banks: Vec<[u8; sizes::CONTROLLER_GRAPHICS]>,
     /// if a flag is true, then the matching data in save_banks should be written to disk
     /// and the flag set to false (also, if `memory[SAVE_CONTROL]` & `AUTO_SAVE` is 0, then
     /// `memory[SAVE_CONTROL]` should set to 0)
@@ -61,6 +63,7 @@ impl VM {
             ram_banks: vec![],
             code_banks: vec![],
             save_banks: vec![],
+            controller_graphics_banks: vec![],
             save_dirty_flag: [false; SAVE_COUNT],
             atlas_banks: vec![],
             error: None,
@@ -101,9 +104,14 @@ impl VM {
     /// Load game
     /// This only copies data to banks, it doesn't reset PC, registers, etc
     /// Call [VM::init()] once before any [VM::step()] calls
-    pub fn load_game(&mut self, game: Vec<u8>, saves: &[[u8; sizes::SAVE_BANK]]) {
-        for (i, save_data) in saves.iter().enumerate() {
-            unsafe {
+    pub fn load_game(
+        &mut self,
+        game: GameFile,
+        saves: &[[u8; sizes::SAVE_BANK]],
+    ) -> Result<(), String> {
+        game.header.validate()?;
+        unsafe {
+            for (i, save_data) in saves.iter().enumerate() {
                 let dst = self
                     .get_memory_mut(
                         address::SAVE_BANK + (i * sizes::SAVE_BANK),
@@ -112,8 +120,20 @@ impl VM {
                     .as_mut_ptr();
                 std::ptr::copy_nonoverlapping(save_data.as_ptr(), dst, sizes::SAVE_BANK);
             }
+            for code_bank in game.code_banks {
+                self.code_banks.push(code_bank);
+            }
+            for atlas_bank in game.atlases {
+                self.atlas_banks.push(atlas_bank);
+            }
+            for graphics in game.controller_graphics {
+                self.controller_graphics_banks.push(graphics);
+            }
+            for _ in 0..game.header.ram_bank_count {
+                self.ram_banks.push([0; sizes::RAM_BANK]);
+            }
         }
-        todo!()
+        Ok(())
     }
 
     /// Loads initial banks and setup sound

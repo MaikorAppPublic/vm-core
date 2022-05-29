@@ -135,6 +135,16 @@ impl VM {
                     return 20;
                 }
             }
+            address::CONTROLLER_TYPE => {
+                if value < self.controller_graphics_banks.len() {
+                    self.load_bank(
+                        address::CONTROLLER_GRAPHICS,
+                        sizes::CONTROLLER_GRAPHICS,
+                        self.controller_graphics_banks[value].as_ptr(),
+                    );
+                    return 20;
+                }
+            }
             _ => {}
         }
 
