@@ -1,9 +1,11 @@
 ## Pre-alpha
 
+### 0.1.14
+- Fix bug with loading game
+
 ### 0.1.13
 - Update dependencies
   - File to 0.1.9
-
 
 ### 0.1.12
 - Update dependencies

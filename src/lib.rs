@@ -1,5 +1,6 @@
 use crate::mem::{address, sizes};
 use crate::register::offset;
+use crate::sizes::MAIN_CODE;
 use crate::sound::Sound;
 use maikor_platform::constants::SAVE_COUNT;
 use maikor_platform::input::controller_type;
@@ -107,32 +108,27 @@ impl VM {
     /// Call [VM::init()] once before any [VM::step()] calls
     pub fn load_game(
         &mut self,
-        game: GameFile,
+        mut game: GameFile,
         saves: &[[u8; sizes::SAVE_BANK]],
     ) -> Result<(), String> {
         game.header.validate()?;
         unsafe {
-            for (i, save_data) in saves.iter().enumerate() {
-                let dst = self
-                    .get_memory_mut(
-                        address::SAVE_BANK + (i * sizes::SAVE_BANK),
-                        sizes::SAVE_BANK,
-                    )
-                    .as_mut_ptr();
-                std::ptr::copy_nonoverlapping(save_data.as_ptr(), dst, sizes::SAVE_BANK);
-            }
-            for code_bank in game.code_banks {
-                self.code_banks.push(code_bank);
-            }
-            for atlas_bank in game.atlases {
-                self.atlas_banks.push(atlas_bank);
-            }
-            for graphics in game.controller_graphics {
-                self.controller_graphics_banks.push(graphics);
-            }
-            for _ in 0..game.header.ram_bank_count {
-                self.ram_banks.push([0; sizes::RAM_BANK]);
-            }
+            let dst = self.get_memory_mut(0, MAIN_CODE).as_mut_ptr();
+            let src = game.main_code.as_mut_ptr();
+            std::ptr::copy_nonoverlapping(src, dst, MAIN_CODE);
+        }
+        self.save_banks = saves.to_vec();
+        for code_bank in game.code_banks {
+            self.code_banks.push(code_bank);
+        }
+        for atlas_bank in game.atlases {
+            self.atlas_banks.push(atlas_bank);
+        }
+        for graphics in game.controller_graphics {
+            self.controller_graphics_banks.push(graphics);
+        }
+        for _ in 0..game.header.ram_bank_count {
+            self.ram_banks.push([0; sizes::RAM_BANK]);
         }
         Ok(())
     }

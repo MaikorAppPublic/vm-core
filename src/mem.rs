@@ -1,6 +1,7 @@
 pub mod sizes {
     use maikor_platform::mem::sizes;
 
+    pub const MAIN_CODE: usize = sizes::MAIN_CODE as usize;
     pub const CODE_BANK: usize = sizes::CODE_BANK as usize;
     pub const RAM_BANK: usize = sizes::RAM_BANK as usize;
     pub const SOUND: usize = sizes::SOUND as usize;
