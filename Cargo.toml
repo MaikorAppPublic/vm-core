@@ -13,7 +13,7 @@ categories = ["games"]
 
 [dependencies]
 maikor-platform = "0.1.27"
-maikor-vm-file = "0.1.8"
+maikor-vm-file = "0.1.9"
 log = "0.4.17"
 blip_buf = "0.1.4"
 
