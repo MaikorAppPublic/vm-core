@@ -1,5 +1,9 @@
 ## Pre-alpha
 
+### 0.1.15
+- Don't copy changes into code and atlas banks
+- Fail if attempting to write in
+
 ### 0.1.14
 - Fix bug with loading game
 
