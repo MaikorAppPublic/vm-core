@@ -238,20 +238,8 @@ impl VM {
 
 #[inline(always)]
 #[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_code_bank_1(addr: usize) -> bool {
-    addr >= address::CODE_BANK_1 && addr < address::CODE_BANK_1 + sizes::CODE_BANK
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_ram_bank_1(addr: usize) -> bool {
     addr >= address::RAM_BANK_1 && addr < address::RAM_BANK_1 + sizes::RAM_BANK
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_code_bank_2(addr: usize) -> bool {
-    addr >= address::CODE_BANK_2 && addr < address::CODE_BANK_2 + sizes::CODE_BANK
 }
 
 #[inline(always)]
@@ -264,30 +252,6 @@ fn is_inside_ram_bank_2(addr: usize) -> bool {
 #[allow(clippy::manual_range_contains)] //range is 2x slower
 fn is_inside_save_bank(addr: usize) -> bool {
     addr >= address::SAVE_BANK && addr < address::SAVE_BANK + sizes::SAVE_BANK
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_atlas1_bank(addr: usize) -> bool {
-    addr >= address::ATLAS1 && addr < address::ATLAS1 + sizes::ATLAS
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_atlas2_bank(addr: usize) -> bool {
-    addr >= address::ATLAS2 && addr < address::ATLAS2 + sizes::ATLAS
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_atlas3_bank(addr: usize) -> bool {
-    addr >= address::ATLAS3 && addr < address::ATLAS3 + sizes::ATLAS
-}
-
-#[inline(always)]
-#[allow(clippy::manual_range_contains)] //range is 2x slower
-fn is_inside_atlas4_bank(addr: usize) -> bool {
-    addr >= address::ATLAS4 && addr < address::ATLAS4 + sizes::ATLAS
 }
 
 #[cfg(test)]
