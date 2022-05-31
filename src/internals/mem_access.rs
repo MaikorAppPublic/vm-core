@@ -188,56 +188,51 @@ impl VM {
     // copied across then it would become `if in code_bank, else if in ram_bank, etc, else mem[addr]`
     // need to perf test but `match` might be ok for speed here
     fn write_mem_change_to_bank(&mut self, addr: usize, value: u8) -> usize {
-        if is_inside_code_bank_1(addr) {
-            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_1_ID] as usize];
-            let code_bank_addr = addr - address::CODE_BANK_1;
-            code_bank[code_bank_addr] = value;
-            1
-        } else if is_inside_code_bank_2(addr) {
-            let code_bank = &mut self.code_banks[self.memory[address::CODE_BANK_2_ID] as usize];
-            let code_bank_addr = addr - address::CODE_BANK_2;
-            code_bank[code_bank_addr] = value;
-            1
-        } else if is_inside_ram_bank_1(addr) {
-            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_1_ID] as usize];
-            let ram_bank_addr = addr - address::RAM_BANK_1;
-            ram_bank[ram_bank_addr] = value;
-            1
+        if is_inside_ram_bank_1(addr) {
+            let idx = self.memory[address::RAM_BANK_1_ID] as usize;
+            if idx < self.ram_banks.len() {
+                let ram_bank = &mut self.ram_banks[idx];
+                let ram_bank_addr = addr - address::RAM_BANK_1;
+                ram_bank[ram_bank_addr] = value;
+                return 1;
+            } else {
+                self.fail(format!(
+                    "Attempted load RAM bank {}, but only {} available",
+                    idx,
+                    self.ram_banks.len()
+                ));
+            }
         } else if is_inside_ram_bank_2(addr) {
-            let ram_bank = &mut self.ram_banks[self.memory[address::RAM_BANK_2_ID] as usize];
-            let ram_bank_addr = addr - address::RAM_BANK_2;
-            ram_bank[ram_bank_addr] = value;
-            1
+            let idx = self.memory[address::RAM_BANK_1_ID] as usize;
+            if idx < self.ram_banks.len() {
+                let ram_bank = &mut self.ram_banks[idx];
+                let ram_bank_addr = addr - address::RAM_BANK_2;
+                ram_bank[ram_bank_addr] = value;
+                return 1;
+            } else {
+                self.fail(format!(
+                    "Attempted load RAM bank {}, but only {} available",
+                    idx,
+                    self.ram_banks.len()
+                ));
+            }
         } else if is_inside_save_bank(addr) {
             let bank_id = self.memory[address::SAVE_BANK_ID] as usize;
-            let save_bank = &mut self.save_banks[bank_id];
-            let save_bank_addr = addr - address::SAVE_BANK;
-            save_bank[save_bank_addr] = value;
-            self.save_dirty_flag[bank_id] = true;
-            1
-        } else if is_inside_atlas1_bank(addr) {
-            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS1_BANK_ID] as usize];
-            let atlas_bank_addr = addr - address::ATLAS1;
-            atlas_bank[atlas_bank_addr] = value;
-            1
-        } else if is_inside_atlas2_bank(addr) {
-            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS2_BANK_ID] as usize];
-            let atlas_bank_addr = addr - address::ATLAS2;
-            atlas_bank[atlas_bank_addr] = value;
-            1
-        } else if is_inside_atlas3_bank(addr) {
-            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS3_BANK_ID] as usize];
-            let atlas_bank_addr = addr - address::ATLAS3;
-            atlas_bank[atlas_bank_addr] = value;
-            1
-        } else if is_inside_atlas4_bank(addr) {
-            let atlas_bank = &mut self.atlas_banks[self.memory[address::ATLAS4_BANK_ID] as usize];
-            let atlas_bank_addr = addr - address::ATLAS4;
-            atlas_bank[atlas_bank_addr] = value;
-            1
-        } else {
-            0
+            if bank_id < self.save_banks.len() {
+                let save_bank = &mut self.save_banks[bank_id];
+                let save_bank_addr = addr - address::SAVE_BANK;
+                save_bank[save_bank_addr] = value;
+                self.save_dirty_flag[bank_id] = true;
+                return 1;
+            } else {
+                self.fail(format!(
+                    "Attempted load save bank {}, but only {} available",
+                    bank_id,
+                    self.save_banks.len()
+                ));
+            }
         }
+        0
     }
 }
 
